@@ -341,4 +341,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63c98f1608494a04b9294aff4b45b4f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  templateObj: {fileID: 7558966805871239714, guid: 825b5cfc9ac96bd49b01e93df6a41e92, type: 3}
+  templateObj: {fileID: 1357223206960612680, guid: 7fd7556432c90ed41912ed72a822f60d, type: 3}

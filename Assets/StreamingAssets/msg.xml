@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<Message xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <num>1</num>
+  <name>hello world :)</name>
+  <f>1</f>
+</Message>

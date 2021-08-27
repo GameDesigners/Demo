@@ -7,9 +7,6 @@ namespace Framework.DataManager
 {
     public class MemPool<T> where T : class, new()
     {
-        protected const uint _default_count = 10;
-        protected const uint _increase_count = 10;
-
         public class PoolElement
         {
             public T m_data;
@@ -32,9 +29,20 @@ namespace Framework.DataManager
             public void SetUnActive() => m_isUsed = false;
         };
 
+        protected Action<T> m_resetPoolElemFunc;
+        public ref Action<T> ResetMemPoolElemFunc
+        {
+            get
+            {
+                return ref m_resetPoolElemFunc;
+            }
+        }
+
         protected List<PoolElement> m_freePool;
         protected List<PoolElement> m_usedPool;
         protected Type m_elemValType;
+        protected const uint _default_count = 10;
+        protected const uint _increase_count = 10;
 
         public MemPool(uint defaultCount = _default_count)
         {
@@ -81,6 +89,7 @@ namespace Framework.DataManager
             m_freePool.Add(elem);
             FreeObject(elem.m_data);
             elem.SetUnActive();
+            m_resetPoolElemFunc?.Invoke(elem.m_data);
         }
 
         public Type GetElemValType() => m_elemValType;
@@ -88,6 +97,7 @@ namespace Framework.DataManager
         public List<PoolElement> GetUsedElemenets() => m_usedPool;
         public int GetFreeElemCount() => m_freePool.Count;
         public int GetUsedElemCount() => m_usedPool.Count;
+        
 
 
         /*
@@ -119,6 +129,7 @@ namespace Framework.DataManager
         protected virtual void UsedObject(T obj) { }
         protected virtual void FreeObject(T obj) { }
 
+        protected virtual void ResetElemData(T obj) { }
         private void ExpansePool()
         {
             for (int index = 0; index < _increase_count; index++)
@@ -172,6 +183,9 @@ namespace Framework.DataManager
         }
     }
 
+    /// <summary>
+    /// 基于GameObject的内存池生命周期管理器
+    /// </summary>
     public class MemPoolElemLifeManager : MonoBehaviour
     {
         public float m_lifeLength;

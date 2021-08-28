@@ -22,6 +22,7 @@ public class SerializerTest : MonoBehaviour
         msg.name = "hello world :)";
         msg.f = 1.0f;
 
+        /*
         Debug.Log(XmlUtil.Serialize(msg));
         string filePath = Application.streamingAssetsPath + "/msg.xml";
         Debug.Log($"Path:{filePath}");
@@ -29,6 +30,16 @@ public class SerializerTest : MonoBehaviour
 
         Message _fromfile = XmlUtil.DeserializeFromFile<Message>(filePath);
         Debug.Log($"num={_fromfile.num}  name={_fromfile.name}  f={_fromfile.f}");
+        */
+
+        Debug.Log(XmlUtil.Serialize(msg));
+        string filePath = Application.streamingAssetsPath + "/msg.json";
+        Debug.Log($"Path:{filePath}");
+        JsonUtil.Serialize(msg, filePath);
+
+        Message _fromfile = JsonUtil.DeserializeFromFile<Message>(filePath);
+        Debug.Log($"num={_fromfile.num}  name={_fromfile.name}  f={_fromfile.f}");
+
     }
 
     // Update is called once per frame

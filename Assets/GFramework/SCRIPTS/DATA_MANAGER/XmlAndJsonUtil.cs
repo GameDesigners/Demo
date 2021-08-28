@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using UnityEngine;
 
@@ -102,6 +100,116 @@ namespace Framework.DataManager
                 return false;
 
             GFileStream.WriteString(filePath, xml);
+            return true;
+        }
+    }
+
+
+    public static class JsonUtil
+    {
+        public static T DeserializeFromFile<T>(string filePath) where T : class
+        {
+            if (filePath.Length == 0 && !typeof(T).IsSerializable)
+                return default;
+
+            try
+            {
+                string jsonstr = GFileStream.ReadString(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                return DeserializeFromString<T>(jsonstr);
+            }
+            catch(Exception ex)
+            {
+                Debug.LogError(ex.ToString());
+                return default;
+            }
+        }
+
+        public static T DeserializeFromString<T>(string json) where T : class
+        {
+            if (json.Length == 0 || !typeof(T).IsSerializable)
+                return default;
+
+            try
+            {
+                return JsonUtility.FromJson<T>(json);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(ex.ToString());
+                return default;
+            }
+        }
+
+        public static void LoadObjectDataFromFile<T>(string filePath,ref T value)
+        {
+            if (filePath.Length == 0 && !typeof(T).IsSerializable)
+                return;
+
+            try
+            {
+                string jsonstr = GFileStream.ReadString(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                JsonUtility.FromJsonOverwrite(jsonstr, value);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(ex.ToString());
+            }
+        }
+
+        public static void LoadObjectDataFromString<T>(string json,ref T value)
+        {
+            if (json.Length == 0 && !typeof(T).IsSerializable)
+                return;
+
+            try
+            {
+                JsonUtility.FromJsonOverwrite(json, value);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(ex.ToString());
+            }
+        }
+
+
+
+
+        /// <summary>
+        /// 序列化对象为字符串
+        /// </summary>
+        /// <typeparam name="T">序列化对象的类型</typeparam>
+        /// <param name="obj">序列化对象</param>
+        /// <returns>相对应的json字符串</returns>
+        public static string Serialize<T>(T obj, bool prettyPrint = false) where T : class
+        {
+            if (obj == null || !typeof(T).IsSerializable)
+                return default;
+
+            try
+            {
+                return JsonUtility.ToJson(obj, prettyPrint);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(ex.ToString());
+                return default;
+            }
+        }
+
+        /// <summary>
+        /// 序列化对象为字符串并将其存储至文件中
+        /// </summary>
+        /// <typeparam name="T">序列化对象的类型</typeparam>
+        /// <param name="obj">序列化对象</param>
+        /// <param name="filePath">文件的路径</param>
+        /// <returns></returns>
+        public static bool Serialize<T>(T obj, string filePath, bool prettyPrint = false) where T : class
+        {
+            string json = Serialize(obj);
+            if (json == default)
+                return false;
+
+            GFileStream.WriteString(filePath, json);
             return true;
         }
     }

@@ -452,7 +452,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &764424552
 Transform:
   m_ObjectHideFlags: 0
@@ -936,6 +936,60 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1102029535}
   m_CullTransparentMesh: 0
+--- !u!1 &1175152029
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1175152031}
+  - component: {fileID: 1175152030}
+  m_Layer: 0
+  m_Name: LinqTest
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1175152030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1175152029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8f3f4c024902d2479e69d02475a365e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  props:
+  - "\u77ED\u5251"
+  - "\u5DE8\u86C7\u4E4B\u7259"
+  - "\u51E1\u6027\u7684\u63D0\u9192"
+  - "\u996E\u8840\u5251"
+  - "\u98D3\u98CE\u4E4B\u5203"
+  - "\u72C2\u8D4C\u94E0\u7532"
+  - "\u8346\u68D8\u4E4B\u7532"
+  - "\u6E34\u8840\u6218\u65A7"
+  - "\u4EA1\u8005\u677F\u7532"
+  - "\u75BE\u5C04\u706B\u70AE"
+--- !u!4 &1175152031
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1175152029}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 702.4752, y: 646.9322, z: -60.211018}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 9
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1358216609
 GameObject:
   m_ObjectHideFlags: 0

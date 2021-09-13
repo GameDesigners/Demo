@@ -9,7 +9,7 @@ namespace Framework
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void Main()
         {
-            Debug.Log("GFramework启动");
+            Debug.Log("GFramework启动...");
         }
     }
 }

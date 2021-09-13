@@ -5,8 +5,15 @@ using UnityEngine;
 
 namespace Framework.DataManager
 {
+    /// <summary>
+    /// 内存池
+    /// </summary>
+    /// <typeparam name="T">存储于内存池的类型（class类）</typeparam>
     public class MemPool<T> where T : class, new()
     {
+        /// <summary>
+        /// 内存池元素
+        /// </summary>
         public class PoolElement
         {
             public T m_data;
@@ -29,6 +36,9 @@ namespace Framework.DataManager
             public void SetUnActive() => m_isUsed = false;
         };
 
+        /// <summary>
+        /// 重置内存池元素的Action委托事件
+        /// </summary>
         protected Action<T> m_resetPoolElemFunc;
         public ref Action<T> ResetMemPoolElemFunc
         {
@@ -44,6 +54,10 @@ namespace Framework.DataManager
         protected const uint _default_count = 10;
         protected const uint _increase_count = 10;
 
+        /// <summary>
+        /// 无、有参构造函数
+        /// </summary>
+        /// <param name="defaultCount"></param>
         public MemPool(uint defaultCount = _default_count)
         {
             m_freePool = new List<PoolElement>();
@@ -57,6 +71,11 @@ namespace Framework.DataManager
                 m_freePool.Add(CreatePoolElement());
         }
 
+        /// <summary>
+        /// 有参构造函数
+        /// </summary>
+        /// <param name="template">模板对象</param>
+        /// <param name="defaultCount">默认数量</param>
         public MemPool(T template, uint defaultCount = _default_count)
         {
             m_freePool = new List<PoolElement>();
@@ -68,6 +87,10 @@ namespace Framework.DataManager
 
         public int GetPoolSize() => m_freePool.Count + m_usedPool.Count;
 
+        /// <summary>
+        /// 获取自由元素
+        /// </summary>
+        /// <returns></returns>
         public T GetFreeElem()
         {
             PoolElement freeElem;

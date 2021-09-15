@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<XBoxOneInputConfig xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <HandleKey>
+    <GameHandle>
+      <tips>[A]</tips>
+      <code>A</code>
+      <keyString>JoystickButton0</keyString>
+    </GameHandle>
+    <GameHandle>
+      <tips>[B]</tips>
+      <code>B</code>
+      <keyString>JoystickButton1</keyString>
+    </GameHandle>
+    <GameHandle>
+      <tips>[X]</tips>
+      <code>X</code>
+      <keyString>JoystickButton2</keyString>
+    </GameHandle>
+    <GameHandle>
+      <tips>[Y]</tips>
+      <code>Y</code>
+      <keyString>JoystickButton3</keyString>
+    </GameHandle>
+    <GameHandle>
+      <tips>[LB]</tips>
+      <code>LB</code>
+      <keyString>JoystickButton4</keyString>
+    </GameHandle>
+    <GameHandle>
+      <tips>[RB]</tips>
+      <code>RB</code>
+      <keyString>JoystickButton5</keyString>
+    </GameHandle>
+    <GameHandle>
+      <tips>[LS]</tips>
+      <code>LS</code>
+      <keyString>JoystickButton8</keyString>
+    </GameHandle>
+    <GameHandle>
+      <tips>[RS]</tips>
+      <code>RS</code>
+      <keyString>JoystickButton9</keyString>
+    </GameHandle>
+  </HandleKey>
+  <HandleAxis>
+    <GameHandleAxis>
+      <tips>Left Trigger</tips>
+      <code>LT</code>
+      <keyString>LT</keyString>
+    </GameHandleAxis>
+    <GameHandleAxis>
+      <tips>Right Trigger</tips>
+      <code>RT</code>
+      <keyString>RT</keyString>
+    </GameHandleAxis>
+    <GameHandleAxis>
+      <tips>Left Stick Vertical</tips>
+      <code>LSVertical</code>
+      <keyString>LSVertical</keyString>
+    </GameHandleAxis>
+    <GameHandleAxis>
+      <tips>Left Stick Horizontal</tips>
+      <code>LSHorizontal</code>
+      <keyString>LSHorizontal</keyString>
+    </GameHandleAxis>
+    <GameHandleAxis>
+      <tips>Right Stick Vertical</tips>
+      <code>RSVertical</code>
+      <keyString>RSVertical</keyString>
+    </GameHandleAxis>
+    <GameHandleAxis>
+      <tips>Right Stick Horizoncal</tips>
+      <code>RSHorizontal</code>
+      <keyString>RSHorizontal</keyString>
+    </GameHandleAxis>
+    <GameHandleAxis>
+      <tips>Vertical</tips>
+      <code>Vertical</code>
+      <keyString>Vertical</keyString>
+    </GameHandleAxis>
+    <GameHandleAxis>
+      <tips>Horizontal</tips>
+      <code>Horizontal</code>
+      <keyString>Horizontal</keyString>
+    </GameHandleAxis>
+  </HandleAxis>
+</XBoxOneInputConfig>

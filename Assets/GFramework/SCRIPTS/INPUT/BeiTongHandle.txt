@@ -1,0 +1,13 @@
+A 键    JoystickButton0  | Joystick1Button0
+B 键    JoystickButton1  | Joystick1Button1
+X 键    JoystickButton2  | Joystick1Button2
+Y 键    JoystickButton3  | Joystick1Button3
+LB键    JoystickButton4  | Joystick1Button4
+RB键    JoystickButton5  | Joystick1Button5
+Back键  JoystickButton6  | Joystick1Button6
+Start键 JoystickButton7  | Joystick1Button7
+
+
+
+https://blog.csdn.net/qingsheng1355/article/details/78970435
+https://ritchielozada.com/2016/01/16/part-11-using-an-xbox-one-controller-with-unity-on-windows-10/

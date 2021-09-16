@@ -25,7 +25,7 @@ namespace Framework.DataManager
             }
             catch(Exception ex)
             {
-                Debug.LogError(ex.ToString());
+                GDebug.Instance.Error(ex.ToString());
                 return default;
             }
         }
@@ -51,7 +51,7 @@ namespace Framework.DataManager
             }
             catch (Exception ex)
             {
-                Debug.LogError(ex.ToString());
+                GDebug.Instance.Error(ex.ToString());
                 return default;
             }
         }
@@ -81,7 +81,7 @@ namespace Framework.DataManager
             }
             catch(Exception ex)
             {
-                Debug.LogError(ex.ToString());
+                GDebug.Instance.Error(ex.ToString());
                 return default;
             }
         }
@@ -119,7 +119,7 @@ namespace Framework.DataManager
             }
             catch(Exception ex)
             {
-                Debug.LogError(ex.ToString());
+                GDebug.Instance.Error(ex.ToString());
                 return default;
             }
         }
@@ -135,7 +135,7 @@ namespace Framework.DataManager
             }
             catch (Exception ex)
             {
-                Debug.LogError(ex.ToString());
+                GDebug.Instance.Error(ex.ToString());
                 return default;
             }
         }
@@ -152,7 +152,7 @@ namespace Framework.DataManager
             }
             catch (Exception ex)
             {
-                Debug.LogError(ex.ToString());
+                GDebug.Instance.Error(ex.ToString());
             }
         }
 
@@ -167,7 +167,7 @@ namespace Framework.DataManager
             }
             catch (Exception ex)
             {
-                Debug.LogError(ex.ToString());
+                GDebug.Instance.Error(ex.ToString());
             }
         }
 
@@ -191,7 +191,7 @@ namespace Framework.DataManager
             }
             catch (Exception ex)
             {
-                Debug.LogError(ex.ToString());
+                GDebug.Instance.Error(ex.ToString());
                 return default;
             }
         }

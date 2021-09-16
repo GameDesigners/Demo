@@ -172,7 +172,7 @@ public class GInput
                 game_input_handle_axis_dic.Add(b.ActionName, b.axis);
         }
         else
-            Debug.LogError("读取用户输入错误");
+            GDebug.Instance.Error("读取用户输入错误");
 
 
     }
@@ -261,7 +261,7 @@ public class GInput
         else
         {
 #if UNITY_EDITOR
-            Debug.LogWarning($"输入系统中{actionName}键值不存在");
+            GDebug.Instance.Warn($"输入系统中{actionName}键值不存在");
 #endif
             return default;
         }

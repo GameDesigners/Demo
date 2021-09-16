@@ -73,7 +73,7 @@ public class GameMessageProc
             MSGObject msgObj = new MSGObject(sender, handler);
             if (msgObjects.Contains(msgObj))
             {
-                Debug.LogWarning("[Warning]已经存在此消息对象...");
+                GDebug.Instance.Warn("[Warning]已经存在此消息对象...");
                 return false;
             }
 
@@ -129,7 +129,7 @@ public class GameMessageProc
         }
 
         if (!isDeleted)
-            Debug.LogWarning("[Warning]不存在消息对象...");
+            GDebug.Instance.Warn("[Warning]不存在消息对象...");
 
         return isDeleted;
     }

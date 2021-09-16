@@ -102,7 +102,7 @@ namespace Framework.DataManager
             m_freePool.Remove(freeElem);
             m_usedPool.Add(freeElem);
             freeElem.SetActive();
-            Debug.Log($"used_count:{GetUsedElemCount()}  free_count:{GetFreeElemCount()}");
+            GDebug.Instance.Log($"used_count:{GetUsedElemCount()}  free_count:{GetFreeElemCount()}");
             return freeElem.m_data;
         }
 
@@ -142,7 +142,7 @@ namespace Framework.DataManager
                 foreach (FieldInfo field in fields)
                 {
                     try { field.SetValue(retval, field.GetValue(template)); }
-                    catch { Debug.Log("throw error..."); }
+                    catch { GDebug.Instance.Error("throw error..."); }
                 }
             }
 
@@ -168,7 +168,7 @@ namespace Framework.DataManager
     {
         public GameObjectPool(uint defaultCount = _default_count)
         {
-            Debug.Log("Come here <GameObject> Child");
+            GDebug.Instance.Log("Come here <GameObject> Child");
         }
 
         public GameObjectPool(GameObject template, uint defaultCount = _default_count)

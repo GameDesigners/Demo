@@ -24,7 +24,7 @@ namespace Framework.DataManager
         {
             if (!FullPathMatch(filePath))
             {
-                Debug.LogError("文件路径不合法");
+                GDebug.Instance.Error("文件路径不合法");
                 return default;
             }
 
@@ -49,7 +49,7 @@ namespace Framework.DataManager
             }
             catch (Exception ex)
             {
-                Debug.Log(ex.ToString());
+                GDebug.Instance.Log(ex.ToString());
                 return default;
             }
         }
@@ -64,7 +64,7 @@ namespace Framework.DataManager
         {
             if (!FullPathMatch(filePath))
             {
-                Debug.LogError("文件路径不合法");
+                GDebug.Instance.Error("文件路径不合法");
                 return;
             }
 
@@ -80,7 +80,7 @@ namespace Framework.DataManager
             }
             catch(Exception ex)
             {
-                Debug.Log(ex.ToString());
+                GDebug.Instance.Error(ex.ToString());
             }
         }
 

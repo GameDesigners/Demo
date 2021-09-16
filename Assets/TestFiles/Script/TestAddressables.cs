@@ -19,14 +19,14 @@ public class TestAddressables : MonoBehaviour
     {
         _skinIndex = _skinIndex == 1 ? 2 : 1;
         var textures = await Addressables.LoadAssetsAsync<Texture2D>(new List<object> { "Sphere Texture", $"Skin{_skinIndex}" }, null, Addressables.MergeMode.Intersection).Task;
-        Debug.Log($"load texture count={textures.Count}");
+        GDebug.Instance.Log($"load texture count={textures.Count}");
         templateObj.GetComponent<Renderer>().material.mainTexture = textures[0];
     }
 
     private async void OnEnable()
     {
         templateObj = await _asset.LoadAssetAsync<GameObject>().Task;
-        Debug.Log("Instantiated finished");
+        GDebug.Instance.Log("Instantiated finished");
         if (pool == null && templateObj != null)
         {
             pool = new GameObjectPool(templateObj);

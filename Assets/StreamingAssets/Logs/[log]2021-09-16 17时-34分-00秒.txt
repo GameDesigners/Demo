@@ -1,6 +1,0 @@
-[17:16:00 log] @File:GFramework.cs  Line:12 
-GFramework启动...
-
-[17:16:01 log] @File:TestLog.cs  Line:11 
-测试Log系统...
-

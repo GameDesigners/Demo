@@ -52,7 +52,7 @@ public class TestAsync : MonoBehaviour
             btns[3].onClick.AddListener(() =>
             {
                 cst.Cancel();
-                Debug.Log("取消人物");
+                GDebug.Instance.Log("取消人物");
             });
         }
     }

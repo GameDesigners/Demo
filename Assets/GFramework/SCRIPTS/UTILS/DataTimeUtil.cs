@@ -9,5 +9,5 @@ using UnityEngine;
 public class DataTimeUtil
 {
     public static string GetTimeStampForFileName() => DateTime.Now.ToString("yyyy-MM-dd HH时-mm分-ss秒");
-    public static string GetDateTimeHMS() => DateTime.Now.ToString("HH:dd:ss");
+    public static string GetDateTimeHMS() => DateTime.Now.ToString("HH:mm:ss");
 }

@@ -55,12 +55,12 @@ namespace Framework.DataManager
         }
 
         /// <summary>
-        /// 将字符串写入文件
+        /// 将字符串写入文件(覆盖非续写)
         /// </summary>
         /// <param name="filePath">文件路径</param>
         /// <param name="str">写入字符串</param>
         /// <param name="encoding">字符编码器</param>
-        public static void WriteString(string filePath,string str,Encoding encoding=default)
+        public static void CoverWriteString(string filePath,string str,Encoding encoding=default)
         {
             if (!FullPathMatch(filePath))
             {
@@ -82,6 +82,13 @@ namespace Framework.DataManager
             {
                 Debug.Log(ex.ToString());
             }
+        }
+
+        public static void AppendWriteString(string filePath,string str)
+        {
+            StreamWriter writter = new StreamWriter(filePath,true);
+            writter.WriteLine(str);
+            writter.Close();
         }
 
         /// <summary>

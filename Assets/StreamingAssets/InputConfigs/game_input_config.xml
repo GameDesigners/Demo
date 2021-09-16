@@ -1,11 +1,6 @@
 <?xml version="1.0"?>
 <GameInputConfig xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <keyboard_btns>
-    <KeyBoardButton>
-      <ActionName>OpenMap</ActionName>
-      <code>M</code>
-    </KeyBoardButton>
-  </keyboard_btns>
+  <keyboard_btns />
   <handle_btns />
   <handle_axis />
 </GameInputConfig>

@@ -15,9 +15,13 @@ public class HelpInfo
 public class InputManagerWindow : EditorWindow
 {
     private static InputManagerWindow _im_window;
+    private Vector2 scrollPos = Vector2.zero;
+
     private static string system_xbox_input_xml_file_path = "xbox_input_config";
     private static string gameplay_input_config_xml_file_path = "game_input_config";
 
+    private static List<string> registerKeyNameList = new List<string>();
+    private static string action_log = "";
 
     private SerializedObject _serializedObject;
     private GUIStyle title_style;
@@ -36,7 +40,7 @@ public class InputManagerWindow : EditorWindow
 
 
     HelpInfo exists_file_msg_info = new HelpInfo();
-    HelpInfo exists_game_input_config_Info = new HelpInfo();
+    HelpInfo editor_game_input_config_Info = new HelpInfo();
 
     protected void OnEnable()
     {
@@ -50,6 +54,9 @@ public class InputManagerWindow : EditorWindow
             title_style = new GUIStyle { fontSize = 20, fontStyle = FontStyle.Bold };
             title_style.normal.textColor = Color.white;
         }
+
+        //更新已注册的按键字符关键字
+        CheckRegisteredStringKeyList(out action_log);
     }
 
     [MenuItem("GFrameworkEditorWindows/InputManagerWindow")]
@@ -63,6 +70,7 @@ public class InputManagerWindow : EditorWindow
 
     private void OnGUI()
     {
+        scrollPos = GUILayout.BeginScrollView(scrollPos);
         EditorGUILayout.Space(10);
         EditorGUILayout.LabelField("系统配置", title_style, new[] { GUILayout.Height(30) });
         EditorGUILayout.LabelField($"Xml文件夹：{Configs.Instance.InputConfigFolderPath}"/*, new[] { GUILayout.Width(300) }*/);
@@ -118,27 +126,32 @@ public class InputManagerWindow : EditorWindow
         EditorGUILayout.EndHorizontal();
 
         EditorGUILayout.BeginHorizontal();
-        if (GUILayout.Button("取消修改", new[] { GUILayout.Width(150), GUILayout.Height(50) }))
+        if (GUILayout.Button("从xml文件中载入", new[] { GUILayout.Width(150), GUILayout.Height(50) }))
         {
             string path = $"{Configs.Instance.InputConfigFolderPath}{gameplay_input_config_xml_file_path}.xml";
             if (File.Exists(path))
             {
                 GAME_INPUT_CONFIG = XmlUtil.DeserializeFromFile<GameInputConfig>(path);
-                exists_game_input_config_Info.isShow = false;
+                editor_game_input_config_Info.isShow = false;
             }
             else
             {
-                Debug.Log($"{path}不存在");
-                exists_game_input_config_Info.isShow = true;
-                exists_game_input_config_Info.msg = "加载错误，该路径不存在";
-                exists_game_input_config_Info.msgType = MessageType.Error;
+                //Debug.Log($"{path}不存在");
+                editor_game_input_config_Info.isShow = true;
+                editor_game_input_config_Info.msg = "加载错误，该路径不存在";
+                editor_game_input_config_Info.msgType = MessageType.Error;
             }
         }
 
         if (GUILayout.Button("保存修改(不可撤销)", new[] { GUILayout.Width(150), GUILayout.Height(50) }))
         {
-            string path = $"{Configs.Instance.InputConfigFolderPath}{gameplay_input_config_xml_file_path}.xml";
-            XmlUtil.Serialize(GAME_INPUT_CONFIG, path);
+            if (CheckRegisteredStringKeyList(out action_log))
+            {
+                string path = $"{Configs.Instance.InputConfigFolderPath}{gameplay_input_config_xml_file_path}.xml";
+                if (File.Exists(path))
+                    File.Delete(path);
+                XmlUtil.Serialize(GAME_INPUT_CONFIG, path);
+            }
         }
 
         EditorGUILayout.EndHorizontal();
@@ -147,9 +160,78 @@ public class InputManagerWindow : EditorWindow
         if (EditorGUI.EndChangeCheck())
         {
             _serializedObject.ApplyModifiedProperties();
+            CheckRegisteredStringKeyList(out action_log);
         }
-        if (exists_game_input_config_Info.isShow)
-            EditorGUILayout.HelpBox(exists_game_input_config_Info.msg, exists_game_input_config_Info.msgType);
+        EditorGUILayout.Space(10);
+        EditorGUILayout.LabelField("键值表");
+        EditorGUI.BeginDisabledGroup(true);
+        EditorGUILayout.TextArea(action_log, new[] { GUILayout.Height(200) });
+        EditorGUI.EndDisabledGroup();
+        if (editor_game_input_config_Info.isShow)
+            EditorGUILayout.HelpBox(editor_game_input_config_Info.msg, editor_game_input_config_Info.msgType);
+        GUILayout.EndScrollView();
+    }
+
+    private bool CheckRegisteredStringKeyList(out string actionlog)
+    {
+        registerKeyNameList.Clear();
+        actionlog = default;
+        foreach (var b in GAME_INPUT_CONFIG.handle_btns)
+        {
+            actionlog = "HANDLE_BTNS\n";
+            if (!registerKeyNameList.Contains(b.ActionName))
+            {
+                registerKeyNameList.Add(b.ActionName);
+                actionlog += $"{b.Description}    {b.ActionName}    {b.code}\n";
+            }
+            else
+            {
+                editor_game_input_config_Info.isShow = true;
+                editor_game_input_config_Info.msg = "存在相同键值[位于handle_btns]";
+                editor_game_input_config_Info.msgType = MessageType.Error;
+                return false;
+            }
+                
+        }
+        foreach (var b in GAME_INPUT_CONFIG.handle_axis)
+        {
+            actionlog += "\nHANDLE_AXIS\n";
+            if (!registerKeyNameList.Contains(b.ActionName))
+            {
+                registerKeyNameList.Add(b.ActionName);
+                actionlog += $"{b.Description}    {b.ActionName}    {b.axis}\n";
+            }
+            else
+            {
+                editor_game_input_config_Info.isShow = true;
+                editor_game_input_config_Info.msg = "存在相同键值[位于handle_axis]";
+                editor_game_input_config_Info.msgType = MessageType.Error;
+                return false;
+            }
+
+        }
+
+        foreach (var b in GAME_INPUT_CONFIG.keyboard_btns)
+        {
+            actionlog += "\nKEYBOARD_BTNS\n";
+            if (!registerKeyNameList.Contains(b.ActionName))
+            {
+                registerKeyNameList.Add(b.ActionName);
+                actionlog += $"{b.Description}    {b.ActionName}    {b.code}\n";
+            }
+            else
+            {
+                editor_game_input_config_Info.isShow = true;
+                editor_game_input_config_Info.msg = "存在相同键值[位于keyboard_btns]";
+                editor_game_input_config_Info.msgType = MessageType.Error;
+                return false;
+            }
+
+        }
+        editor_game_input_config_Info.isShow = false;
+        if (action_log == default)
+            action_log = "当前未设置任何键值";
+        return true;
 
     }
 }

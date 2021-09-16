@@ -99,7 +99,7 @@ namespace Framework.DataManager
             if (xml == default)
                 return false;
 
-            GFileStream.WriteString(filePath, xml);
+            GFileStream.CoverWriteString(filePath, xml);
             return true;
         }
     }
@@ -209,7 +209,7 @@ namespace Framework.DataManager
             if (json == default)
                 return false;
 
-            GFileStream.WriteString(filePath, json);
+            GFileStream.CoverWriteString(filePath, json);
             return true;
         }
     }

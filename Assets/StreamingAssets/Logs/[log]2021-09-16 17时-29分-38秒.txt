@@ -1,0 +1,6 @@
+[17:16:38 log] @File:GDebug.cs  Line:38 
+GFramework启动...
+
+[17:16:39 log] @File:GDebug.cs  Line:38 
+测试Log系统...
+

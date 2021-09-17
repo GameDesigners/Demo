@@ -1,0 +1,15 @@
+[18:16:03 log] @File:GFramework.cs  Line:12 
+GFramework启动...
+
+[18:16:03 log] @File:TestLog.cs  Line:11 
+测试Log系统...
+
+[18:16:05 error] @File:GUIManager.cs  Line:75 
+Main Canvas缺失，UI无法启动...
+
+[18:16:05 log] @File:GUIManager.cs  Line:126 
+无法找到id:1对应的UI界面
+
+[18:16:05 log] @File:TestAddressables.cs  Line:35 
+Instantiated finished
+

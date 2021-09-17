@@ -2,7 +2,13 @@
 using Framework.DataManager;
 using UnityEngine.AddressableAssets;
 using System.Collections.Generic;
+using UnityEngine.ResourceManagement.ResourceLocations;
 
+[System.Serializable]
+public class AssetList
+{
+    public List<AssetReference> reference;
+}
 public class TestAddressables : MonoBehaviour
 {
     GameObjectPool pool;
@@ -32,6 +38,8 @@ public class TestAddressables : MonoBehaviour
             pool = new GameObjectPool(templateObj);
             pool.ResetMemPoolElemFunc += Reset;
         }
+        Debug.Log(_asset);
+
     }
 
     private void OnDisable()
@@ -44,6 +52,8 @@ public class TestAddressables : MonoBehaviour
         templateObj1 = new GGameObjectResource(_asset);
         GameObject go = await templateObj1.InstantiateAsync();
         go.name = "新创建的对象";
+
+
     }
 
     private void Update()

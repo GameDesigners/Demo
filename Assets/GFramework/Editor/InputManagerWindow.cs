@@ -156,7 +156,7 @@ public class InputManagerWindow : EditorWindow
 
         EditorGUILayout.EndHorizontal();
 
-            EditorGUILayout.PropertyField(game_input_config_Property, true);
+        EditorGUILayout.PropertyField(game_input_config_Property, true);
         if (EditorGUI.EndChangeCheck())
         {
             _serializedObject.ApplyModifiedProperties();

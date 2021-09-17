@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<UIPanelPrefabsList xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <main_canvas_guid>32c94253eb5e87f42a8b3e8b58de9e13</main_canvas_guid>
+  <root>
+    <Elem>
+      <id>0</id>
+      <key>@input_modify_page</key>
+      <description>输入设置页面</description>
+      <guid>3563d3419e03c984fb626c63f4c072f3</guid>
+      <unique>false</unique>
+    </Elem>
+    <Elem>
+      <id>1</id>
+      <key>@gaming_page</key>
+      <description>游戏主页面</description>
+      <guid>809963dcc454ba049ad5816e5fce0eec</guid>
+      <unique>false</unique>
+    </Elem>
+  </root>
+</UIPanelPrefabsList>

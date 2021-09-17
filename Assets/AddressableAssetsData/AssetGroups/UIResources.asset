@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: UIResources
+  m_EditorClassIdentifier: 
+  m_GroupName: UIResources
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 3685b549ec88b1e49879e37d3b1295c0
+  m_SerializeEntries:
+  - m_GUID: 32c94253eb5e87f42a8b3e8b58de9e13
+    m_Address: Assets/TestFiles/Prefabs/@UIROOT.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 0}
+    m_TargetAsset: {fileID: 0}
+  - m_GUID: 3563d3419e03c984fb626c63f4c072f3
+    m_Address: Assets/TestFiles/Prefabs/@input_modify_page.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 0}
+    m_TargetAsset: {fileID: 0}
+  - m_GUID: 809963dcc454ba049ad5816e5fce0eec
+    m_Address: Assets/TestFiles/Prefabs/@gaming_page.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 8055197958626610035, guid: 809963dcc454ba049ad5816e5fce0eec, type: 3}
+    m_TargetAsset: {fileID: 8055197958626610035, guid: 809963dcc454ba049ad5816e5fce0eec, type: 3}
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: c85f5f2716fa5884ab92e12c82f418d6, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 417313c4b4767b243a191a2d968a8a85, type: 2}
+    - {fileID: 11400000, guid: dafe899183bca1b4f91b64e8de667b4d, type: 2}

@@ -20,7 +20,7 @@ namespace Framework.DataManager
         /// <param name="access">文件流应用权限</param>
         /// <param name="share">文件流共享方式</param>
         /// <returns></returns>
-        public static string ReadString(string filePath, FileMode mode, FileAccess access, FileShare share)
+        public static string ReadString(string filePath, FileMode mode, FileAccess access, FileShare share,Encoding encoding=default)
         {
             if (!FullPathMatch(filePath))
             {
@@ -33,7 +33,9 @@ namespace Framework.DataManager
                 FileStream stream = new FileStream(filePath, mode, access, share);
                 byte[] buffer = new byte[BUFFERSIZE];
                 bool completed = false;
-                Encoding encoding = GetEncoding(stream);
+                //Encoding encoding = GetEncoding(stream);
+                if (encoding == default)
+                    encoding = Encoding.Default;
                 string result = "";
                 do
                 {
@@ -69,7 +71,7 @@ namespace Framework.DataManager
             }
 
             if (encoding == default)
-                encoding = Encoding.UTF8;
+                encoding = Encoding.Default;
 
             try
             {

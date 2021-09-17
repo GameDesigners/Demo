@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 
 public class TestCortoutines : MonoBehaviour
 {
@@ -47,7 +48,7 @@ public class TestCortoutines : MonoBehaviour
 
     private IEnumerator WaitForWWW()
     {
-        WWW www=new WWW("url");
+        UnityWebRequest www=new UnityWebRequest("url");
         yield return www;
         Debug.Log("等待一个网络请求完成后从当前位置继续执行");
 

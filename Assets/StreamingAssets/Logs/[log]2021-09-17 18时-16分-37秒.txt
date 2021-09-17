@@ -1,0 +1,9 @@
+[18:16:37 log] @File:GFramework.cs  Line:12 
+GFramework启动...
+
+[18:16:38 log] @File:TestLog.cs  Line:11 
+测试Log系统...
+
+[18:16:39 log] @File:TestAddressables.cs  Line:35 
+Instantiated finished
+

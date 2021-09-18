@@ -21,10 +21,16 @@ MonoBehaviour:
     m_Address: Assets/TestFiles/Prefabs/@UIROOT.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
-    m_MainAsset: {fileID: 0}
-    m_TargetAsset: {fileID: 0}
+    m_MainAsset: {fileID: 7729422556159097117, guid: 32c94253eb5e87f42a8b3e8b58de9e13, type: 3}
+    m_TargetAsset: {fileID: 7729422556159097117, guid: 32c94253eb5e87f42a8b3e8b58de9e13, type: 3}
   - m_GUID: 3563d3419e03c984fb626c63f4c072f3
     m_Address: Assets/TestFiles/Prefabs/@input_modify_page.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 0}
+    m_TargetAsset: {fileID: 0}
+  - m_GUID: 6bef7204e3cdaed479093fd3aab08769
+    m_Address: Assets/TestFiles/Prefabs/@ui_comp_page.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
     m_MainAsset: {fileID: 0}
@@ -33,8 +39,14 @@ MonoBehaviour:
     m_Address: Assets/TestFiles/Prefabs/@gaming_page.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
-    m_MainAsset: {fileID: 8055197958626610035, guid: 809963dcc454ba049ad5816e5fce0eec, type: 3}
-    m_TargetAsset: {fileID: 8055197958626610035, guid: 809963dcc454ba049ad5816e5fce0eec, type: 3}
+    m_MainAsset: {fileID: 0}
+    m_TargetAsset: {fileID: 0}
+  - m_GUID: 947425215b57a964e86cd9b9c9f4a4a4
+    m_Address: Assets/TestFiles/Prefabs/@other_page.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 0}
+    m_TargetAsset: {fileID: 0}
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: c85f5f2716fa5884ab92e12c82f418d6, type: 2}
   m_SchemaSet:

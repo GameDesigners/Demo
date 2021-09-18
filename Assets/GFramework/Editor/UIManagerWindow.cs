@@ -15,6 +15,12 @@ public class EditorUIPanelElem
     public bool unique;
 }
 
+[System.Serializable]
+public class EditorAssetReference
+{
+    public AssetReference asset;
+}
+
 public class UIManagerWindow : EditorWindow
 {
     private static UIManagerWindow _uim_window;
@@ -26,8 +32,8 @@ public class UIManagerWindow : EditorWindow
     private SerializedProperty ui_main_canvas_property;
 
     //data
-    [SerializeField] private AssetReference ui_main_canvas =new AssetReference();
-    [SerializeField,Header("UI Prefabs List 编辑")] private List<EditorUIPanelElem> ui_panel_prefab_list = new List<EditorUIPanelElem>();
+    [SerializeField] private EditorAssetReference ui_main_canvas =new EditorAssetReference();
+    [SerializeField] private List<EditorUIPanelElem> ui_panel_prefab_list = new List<EditorUIPanelElem>();
 
     //other params
     private List<string> ui_panel_check_unique_list=new List<string>();
@@ -96,9 +102,10 @@ public class UIManagerWindow : EditorWindow
                         e.unique = d.unique;
                         tmp.Add(e);
                     }
-                    ui_main_canvas = new AssetReference(list.main_canvas_guid);
+                    ui_main_canvas.asset = new AssetReference(list.main_canvas_guid);
                     ui_panel_prefab_list = tmp;
                     _this.Update();
+                    Debug.Log("awalys Update");
                 }
             }
         }
@@ -110,7 +117,7 @@ public class UIManagerWindow : EditorWindow
                 if (File.Exists(path))
                     File.Delete(path);
                 UIPanelPrefabsList dic = new UIPanelPrefabsList();
-                dic.main_canvas_guid = ui_main_canvas.AssetGUID;
+                dic.main_canvas_guid = ui_main_canvas.asset.AssetGUID;
                 dic.root = new List<UIPanelPrefabsList.Elem>();
                 for(int index=0;index<ui_panel_prefab_list.Count;index++)
                 {
@@ -128,22 +135,23 @@ public class UIManagerWindow : EditorWindow
         EditorGUILayout.EndHorizontal();
 
         EditorGUILayout.Space(20);
-        EditorGUILayout.PropertyField(ui_main_canvas_property, true);
-        EditorGUILayout.PropertyField(ui_panel_prefab_list_property, true);
+        EditorGUILayout.PropertyField(ui_main_canvas_property, new GUIContent("UI根目录AssetReference"), true);
+
+
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(ui_panel_prefab_list_property, new GUIContent("UI 预制体列表"), true);
         EditorGUILayout.LabelField("UI Panels 信息值：");
         EditorGUI.BeginDisabledGroup(true);
-        EditorGUILayout.TextArea(ui_panel_key_log, new[] { GUILayout.Height(200) });
+        EditorGUILayout.TextArea(ui_panel_key_log, new[] { GUILayout.Height(80 * ui_panel_prefab_list.Count) });
         EditorGUI.EndDisabledGroup();
         if (ui_panel_list_help_info.isShow) EditorGUILayout.HelpBox(ui_panel_list_help_info.msg, ui_panel_list_help_info.msgType);
-
-
-
 
         if (EditorGUI.EndChangeCheck())
         {
             CheckUIPanelKeyUnique(out ui_panel_key_log);
+            //Debug.Log("awaly apply modifiedProperties...");
             _this.ApplyModifiedProperties();
-            ui_main_canvas = new AssetReference(ui_main_canvas.AssetGUID);
+            //ui_main_canvas.asset = new AssetReference(ui_main_canvas.asset.AssetGUID);
         }
 
         GUILayout.EndScrollView();

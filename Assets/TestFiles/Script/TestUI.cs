@@ -17,7 +17,7 @@ public class TestUI : MonoBehaviour
         if(GInput.Instance.GetKeyDown(KeyCode.M))
         {
             if(basePage==default)
-                basePage = GUIManager.Instance.OpenUIPage("@gaming_page");
+                basePage = GUIManager.Instance.OpenUIPage("@ui_comp_page");
             else
             {
                 if (GUIManager.Instance.CloseUIPage(basePage))

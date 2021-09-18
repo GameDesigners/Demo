@@ -16,5 +16,19 @@
       <guid>809963dcc454ba049ad5816e5fce0eec</guid>
       <unique>true</unique>
     </Elem>
+    <Elem>
+      <id>2</id>
+      <key>@other_page</key>
+      <description>游戏其他页面</description>
+      <guid>947425215b57a964e86cd9b9c9f4a4a4</guid>
+      <unique>true</unique>
+    </Elem>
+    <Elem>
+      <id>3</id>
+      <key>@ui_comp_page</key>
+      <description>游戏UI组件测试页面</description>
+      <guid>6bef7204e3cdaed479093fd3aab08769</guid>
+      <unique>true</unique>
+    </Elem>
   </root>
 </UIPanelPrefabsList>

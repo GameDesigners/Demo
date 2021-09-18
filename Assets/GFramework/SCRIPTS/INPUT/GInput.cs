@@ -123,30 +123,38 @@ public class GInput
         private set { }
     }
 
-    public GInput()
+    public bool Initialize()
     {
-        LoadGameHandleKeyConfig();
-        LoadGameInputConfig();
         InitialModifyRecordObject();
+        if (!LoadGameHandleKeyConfig()) return false;
+        if(!LoadGameInputConfig()) return false;
+        return true;
     }
 
     /// <summary>
     /// 加载游戏手柄按键配置
     /// </summary>
-    private void LoadGameHandleKeyConfig()
+    private bool LoadGameHandleKeyConfig()
     {
         XBoxOneInputConfig config = XmlUtil.DeserializeFromFile<XBoxOneInputConfig>($"{Configs.Instance.InputConfigFolderPath}xbox_input_config.xml");
-        handle_btns = config.HandleKey;
-        handle_axis = config.HandleAxis;
+        if (config != default)
+        {
+            handle_btns = config.HandleKey;
+            handle_axis = config.HandleAxis;
 
 
-        handle_keycode = new Dictionary<HandleKey, KeyCode>();
-        foreach (var b in handle_btns)
-            handle_keycode.Add(b.code, (KeyCode)Enum.Parse(typeof(KeyCode), b.keyString));
+            handle_keycode = new Dictionary<HandleKey, KeyCode>();
+            foreach (var b in handle_btns)
+                handle_keycode.Add(b.code, (KeyCode)Enum.Parse(typeof(KeyCode), b.keyString));
 
-        handle_axis_maps = new Dictionary<HandleAxis, string>();
-        foreach (var a in handle_axis)
-            handle_axis_maps.Add(a.code, a.keyString);
+            handle_axis_maps = new Dictionary<HandleAxis, string>();
+            foreach (var a in handle_axis)
+                handle_axis_maps.Add(a.code, a.keyString);
+
+            return true;
+        }
+        else
+            return false;
     }
 
     /// <summary>
@@ -154,7 +162,7 @@ public class GInput
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
-    private void LoadGameInputConfig()
+    private bool LoadGameInputConfig()
     {
         string path = $"{Configs.Instance.InputConfigFolderPath}game_input_config.xml";
         GameInputConfig config = XmlUtil.DeserializeFromFile<GameInputConfig>(path);
@@ -170,9 +178,13 @@ public class GInput
                 game_input_keyboard_dic.Add(b.ActionName, b.code);
             foreach (var b in config.handle_axis)
                 game_input_handle_axis_dic.Add(b.ActionName, b.axis);
+            return true;
         }
         else
+        {
             GDebug.Instance.Error("读取用户输入错误");
+            return false;
+        }
 
 
     }

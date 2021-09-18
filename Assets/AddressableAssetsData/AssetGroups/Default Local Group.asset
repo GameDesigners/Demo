@@ -21,12 +21,6 @@ MonoBehaviour:
     m_Address: Sphere
     m_ReadOnly: 0
     m_SerializedLabels: []
-    m_MainAsset: {fileID: 1357223206960612680, guid: 7fd7556432c90ed41912ed72a822f60d, type: 3}
-    m_TargetAsset: {fileID: 1357223206960612680, guid: 7fd7556432c90ed41912ed72a822f60d, type: 3}
-  - m_GUID: 9fc0d4010bbf28b4594072e72b8655ab
-    m_Address: Assets/TestFiles/Scenes/TestScenes.unity
-    m_ReadOnly: 0
-    m_SerializedLabels: []
     m_MainAsset: {fileID: 0}
     m_TargetAsset: {fileID: 0}
   m_ReadOnly: 0

@@ -7,7 +7,7 @@ using Framework.DataManager;
 
 public class GDebug
 {
-    public int max_log_count = 3;
+    public int max_log_count = 10;
 
 
     private string path;

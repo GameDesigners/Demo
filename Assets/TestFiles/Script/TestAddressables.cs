@@ -14,7 +14,7 @@ public class TestAddressables : MonoBehaviour
     GameObjectPool pool;
 
     /*使用Addressables加载游戏对象*/
-    [SerializeField] private AssetReference _asset;
+    public AssetReference _asset;
     private GameObject templateObj;
 
     GGameObjectResource templateObj1;

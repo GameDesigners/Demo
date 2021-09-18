@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using UnityEngine;
 
 [Serializable]
@@ -19,10 +20,19 @@ public class Configs
     public Configs()
     {
         InputConfigFolderPath = Application.streamingAssetsPath + "/InputConfigs/";
-        LogFolderPath = Application.streamingAssetsPath + "/Logs/";
         UIConfigFolderPath = Application.streamingAssetsPath + "/UIConfigs/";
 
-        UIPrefabsConfigPath= $"{UIConfigFolderPath}ui_panel_prefabs_config.xml";
+
+#if UNITY_EDITOR
+        DirectoryInfo di = new DirectoryInfo(Application.streamingAssetsPath);
+        string preDirectory = di.Parent.Parent.FullName;
+        LogFolderPath = preDirectory + "/Logs/";
+#else
+        LogFolderPath = Application.streamingAssetsPath + "/Logs/";
+#endif
+
+
+        UIPrefabsConfigPath = $"{UIConfigFolderPath}ui_panel_prefabs_config.xml";
     }
 
     private static Configs _instance;

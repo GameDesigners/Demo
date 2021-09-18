@@ -143,7 +143,6 @@ public class UIManagerWindow : EditorWindow
         {
             CheckUIPanelKeyUnique(out ui_panel_key_log);
             _this.ApplyModifiedProperties();
-            ui_main_canvas.ReleaseAsset();
             ui_main_canvas = new AssetReference(ui_main_canvas.AssetGUID);
         }
 
@@ -169,7 +168,7 @@ public class UIManagerWindow : EditorWindow
             {
                 ui_panel_check_unique_list.Add(ui_panel_prefab_list[index].key);
                 ui_panel_unique_guid_list.Add(ui_panel_prefab_list[index].asset.AssetGUID);
-                log += $"index:[{index}]\nkey:{ui_panel_prefab_list[index].key}\ndescription:{ui_panel_prefab_list[index].description}\nGUID:[{ui_panel_prefab_list[index].asset.AssetGUID}]\n\n";
+                log += $"index:[{index}]\nkey:{ui_panel_prefab_list[index].key}\ndescription:{ui_panel_prefab_list[index].description}\nGUID:[{ui_panel_prefab_list[index].asset.AssetGUID}]\nunique:[{ui_panel_prefab_list[index].unique}]\n\n";
             }
             else 
             {

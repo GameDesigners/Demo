@@ -8,11 +8,14 @@ public class TestCortoutines : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        StartCoroutine(NextFrame());
-        StartCoroutine(WaitForFrames(5));
-        StartCoroutine(WaitForSeconds(5));
-        StartCoroutine(WaitForEndOfFrame());
-        StartCoroutine(WaitForFixedUpdate());
+        //StartCoroutine(NextFrame());
+        //StartCoroutine(WaitForFrames(5));
+        //StartCoroutine(WaitForSeconds(5));
+        //StartCoroutine(WaitForEndOfFrame());
+        //StartCoroutine(WaitForFixedUpdate());
+
+        StartCoroutine(WaitForIsDone());
+        Debug.Log("是否执行...");
     }
 
     private IEnumerator NextFrame()
@@ -64,5 +67,10 @@ public class TestCortoutines : MonoBehaviour
     {
         Debug.Log("如果使用yield break语句，将会导致协程的执行条件不被满足，不会从当前的位置继续执行程序，而是直接从当前位置跳出函数体，回到函数的根部");
         yield break;
+    }
+
+    private IEnumerator WaitForIsDone()
+    {
+        yield return false;
     }
 }

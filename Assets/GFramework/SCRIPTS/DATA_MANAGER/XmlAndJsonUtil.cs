@@ -104,7 +104,9 @@ namespace Framework.DataManager
         }
     }
 
-
+    /// <summary>
+    /// Json 序列化工具
+    /// </summary>
     public static class JsonUtil
     {
         public static T DeserializeFromFile<T>(string filePath) where T : class

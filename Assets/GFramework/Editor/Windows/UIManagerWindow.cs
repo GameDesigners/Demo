@@ -41,9 +41,6 @@ public class UIManagerWindow : EditorWindow
     private HelpInfo ui_panel_list_help_info = new HelpInfo();
     string ui_panel_key_log;
 
-    //gui style data
-    private GUIStyle title_style;
-
     string path = Configs.Instance.UIPrefabsConfigPath;
 
     [MenuItem("GFrameworkEditorWindows/UIManagerWindow")]
@@ -60,23 +57,19 @@ public class UIManagerWindow : EditorWindow
         ui_panel_prefab_list_property = _this.FindProperty("ui_panel_prefab_list");
 
         CheckUIPanelKeyUnique(out ui_panel_key_log);
-        InitialGUIStyle();
-    }
-
-    private void InitialGUIStyle()
-    {
-        if (title_style == null)
-        {
-            title_style = new GUIStyle { fontSize = 20, fontStyle = FontStyle.Bold };
-            title_style.normal.textColor = Color.white;
-        }
     }
 
     private void OnGUI()
     {
         scrollPos = GUILayout.BeginScrollView(scrollPos);
         EditorGUILayout.Space(10);
-        EditorGUILayout.LabelField("UI Panel 资源列表", title_style, new[] { GUILayout.Height(30) });
+        EditorGUILayout.LabelField("UI Panel 资源列表", EditorGUIStyles.Instance.TitleStyle, new[] { GUILayout.Height(30) });
+        UIPanelListEditorWindowRender();
+
+        GUILayout.EndScrollView();
+    }
+    private void UIPanelListEditorWindowRender()
+    {
         EditorGUILayout.LabelField($"Xml文件夹：{Configs.Instance.UIConfigFolderPath}"/*, new[] { GUILayout.Width(300) }*/);
         EditorGUILayout.LabelField($"Xml文件名：{Path.GetFileNameWithoutExtension(Configs.Instance.UIPrefabsConfigPath)}.xml");
 
@@ -85,14 +78,14 @@ public class UIManagerWindow : EditorWindow
         {
             if (!Directory.Exists(Configs.Instance.UIConfigFolderPath))
                 Directory.CreateDirectory(Configs.Instance.UIConfigFolderPath);
-            
-            if(File.Exists(path))
+
+            if (File.Exists(path))
             {
                 List<EditorUIPanelElem> tmp = new List<EditorUIPanelElem>();
                 UIPanelPrefabsList list = XmlUtil.DeserializeFromFile<UIPanelPrefabsList>(path);
-                if(list!=default)
+                if (list != default)
                 {
-                    
+
                     foreach (var d in list.root)
                     {
                         EditorUIPanelElem e = new EditorUIPanelElem();
@@ -112,14 +105,14 @@ public class UIManagerWindow : EditorWindow
 
         if (GUILayout.Button("保存修改(不可撤销)", new[] { GUILayout.Width(150), GUILayout.Height(50) }))
         {
-            if(CheckUIPanelKeyUnique(out ui_panel_key_log))
+            if (CheckUIPanelKeyUnique(out ui_panel_key_log))
             {
                 if (File.Exists(path))
                     File.Delete(path);
                 UIPanelPrefabsList dic = new UIPanelPrefabsList();
                 dic.main_canvas_guid = ui_main_canvas.asset.AssetGUID;
                 dic.root = new List<UIPanelPrefabsList.Elem>();
-                for(int index=0;index<ui_panel_prefab_list.Count;index++)
+                for (int index = 0; index < ui_panel_prefab_list.Count; index++)
                 {
                     UIPanelPrefabsList.Elem elem = new UIPanelPrefabsList.Elem();
                     elem.id = index;
@@ -129,7 +122,7 @@ public class UIManagerWindow : EditorWindow
                     elem.unique = ui_panel_prefab_list[index].unique;
                     dic.root.Add(elem);
                 }
-                XmlUtil.Serialize(dic, path);                
+                XmlUtil.Serialize(dic, path);
             }
         }
         EditorGUILayout.EndHorizontal();
@@ -153,9 +146,8 @@ public class UIManagerWindow : EditorWindow
             _this.ApplyModifiedProperties();
             //ui_main_canvas.asset = new AssetReference(ui_main_canvas.asset.AssetGUID);
         }
-
-        GUILayout.EndScrollView();
     }
+    
 
 
     private bool CheckUIPanelKeyUnique(out string log)

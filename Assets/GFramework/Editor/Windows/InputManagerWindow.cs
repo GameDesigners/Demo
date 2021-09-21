@@ -10,6 +10,14 @@ public class HelpInfo
     public bool isShow = false;
     public string msg = "";
     public MessageType msgType;
+
+    public bool Show(int space = 5)
+    {
+        EditorGUILayout.Space(space);
+        if (isShow)
+            EditorGUILayout.HelpBox(msg, msgType);
+        return isShow;
+    }
 }
 
 public class InputManagerWindow : EditorWindow
@@ -24,7 +32,6 @@ public class InputManagerWindow : EditorWindow
     private static string action_log = "";
 
     private SerializedObject _serializedObject;
-    private GUIStyle title_style;
 
     [SerializeField,Header("手柄按键的对应Key Code字符串")] 
     private List<GameHandle> handle_btns_list = new List<GameHandle>();
@@ -49,12 +56,6 @@ public class InputManagerWindow : EditorWindow
         handle_axis_list_Property = _serializedObject.FindProperty("handle_axis_list");
         game_input_config_Property=_serializedObject.FindProperty("GAME_INPUT_CONFIG");
 
-        if (title_style==null)
-        {
-            title_style = new GUIStyle { fontSize = 20, fontStyle = FontStyle.Bold };
-            title_style.normal.textColor = Color.white;
-        }
-
         //更新已注册的按键字符关键字
         CheckRegisteredStringKeyList(out action_log);
     }
@@ -72,7 +73,7 @@ public class InputManagerWindow : EditorWindow
     {
         scrollPos = GUILayout.BeginScrollView(scrollPos);
         EditorGUILayout.Space(10);
-        EditorGUILayout.LabelField("系统配置", title_style, new[] { GUILayout.Height(30) });
+        EditorGUILayout.LabelField("系统配置", EditorGUIStyles.Instance.TitleStyle, new[] { GUILayout.Height(30) });
         EditorGUILayout.LabelField($"Xml文件夹：{Configs.Instance.InputConfigFolderPath}"/*, new[] { GUILayout.Width(300) }*/);
         EditorGUILayout.LabelField($"Xml文件名：{system_xbox_input_xml_file_path}.xml");
 
@@ -116,7 +117,7 @@ public class InputManagerWindow : EditorWindow
 
 
         EditorGUILayout.Space(50);
-        EditorGUILayout.LabelField("用户自定义Input参数", title_style, new[] { GUILayout.Height(30) });
+        EditorGUILayout.LabelField("用户自定义Input参数", EditorGUIStyles.Instance.TitleStyle, new[] { GUILayout.Height(30) });
 
         EditorGUILayout.LabelField($"Xml文件夹：{Configs.Instance.InputConfigFolderPath}"/*, new[] { GUILayout.Width(300) }*/);
         EditorGUILayout.BeginHorizontal();

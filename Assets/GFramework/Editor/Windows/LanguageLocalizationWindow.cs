@@ -27,6 +27,7 @@ public class LanguageLocalizationWindow : EditorWindow
 
         ui_gameobject_list_property = _this.FindProperty("ui_gameobject_list");
         ui_language_list_property = _this.FindProperty("ui_language_list");
+        ui_ui_new_setting_file_name_property = _this.FindProperty("ui_ui_new_setting_file_name");
 
         gird_width = (int)position.width / (ui_language_list.Count + 1);
 
@@ -38,6 +39,11 @@ public class LanguageLocalizationWindow : EditorWindow
 
         Debug.Log("Call OnEnable()");
     }
+
+    private void OnDisable()
+    {
+        //SaveLocalizationCustomSetting();
+    }
     //===========================================================================
 
 
@@ -45,15 +51,24 @@ public class LanguageLocalizationWindow : EditorWindow
     #region 本地化常规设置部分
     private SerializedProperty ui_gameobject_list_property;
     private SerializedProperty ui_language_list_property;
+    private SerializedProperty ui_ui_new_setting_file_name_property;
 
     [SerializeField] private List<GameObject> ui_gameobject_list=new List<GameObject>();
     [SerializeField] private List<string> ui_language_list = new List<string>();
+
+    private List<string> config_file_list = new List<string>();
+    private bool is_editing_custom_setting_list = false;  //是否正在编辑本地常规化设置
+    private int config_file_select = 0;
 
     /// <summary>
     /// 加载关于本地化常规设置配置
     /// </summary>
     private void LoadLocalizationCustomSetting()
     {
+        config_file_list.Clear();
+        config_file_list.Add("None");
+        string[] filePaths = Directory.GetFiles(Configs.Instance.Editor_EditorConfigFolderPath);
+        config_file_list.AddRange(filePaths.ToList());
         if (!Directory.Exists(Configs.Instance.Editor_EditorConfigFolderPath))
         {
             Directory.CreateDirectory(Configs.Instance.Editor_EditorConfigFolderPath);
@@ -82,14 +97,20 @@ public class LanguageLocalizationWindow : EditorWindow
         }
     }
 
-    private void SaveLocalizationCustomSetting()
+    /// <summary>
+    /// 保存关于本地化常规设置配置
+    /// </summary>
+    private void SaveLocalizationCustomSetting(string path)
     {
-        if (!Directory.Exists(Configs.Instance.Editor_EditorConfigFolderPath))
-            Directory.CreateDirectory(Configs.Instance.Editor_EditorConfigFolderPath);
-        if (File.Exists(Configs.Instance.Editor_LanguageLocalizationConfigFilePath))
-            File.Delete(Configs.Instance.Editor_LanguageLocalizationConfigFilePath);
+        if (File.Exists(path))
+            File.Delete(path);
 
         LocalizationLanguageEditorConfig lle_config = new LocalizationLanguageEditorConfig();
+        foreach (var o in ui_gameobject_list)
+            lle_config.gameObjectPathsInProject.Add(AssetDatabase.GetAssetPath(o));
+        lle_config.languageList = ui_language_list;
+        lle_config.UpdateLanguageIndexDic();
+        XmlUtil.Serialize(lle_config, path);
     }
 
     /// <summary>
@@ -97,36 +118,63 @@ public class LanguageLocalizationWindow : EditorWindow
     /// </summary>
     private void LocalizationCustomSettingGUI()
     {
-        EditorGUILayout.Space(10);
-        EditorGUILayout.LabelField("本地化常规设置", EditorGUIStyles.Instance.TitleStyle, new[] { GUILayout.Height(30) });
+        GEditorGUI.Title("本地化常规设置");
+        /*
+        GEditorGUI.Label("TIPS:\n1.编辑器的存储Key包含预制体的名称，因此预制体的名称很重要。除非万不得已，不要修改！\n" +
+                                "2.若要修改，则建议选择创建新Excel模板的创建模式。\n" +
+                                "3.修改此处的设置为高位行为。建议【宜添加不宜修改】"
+                                , height:70);
+        */
+        EditorGUILayout.BeginHorizontal();
+        config_file_select = EditorGUILayout.Popup(new GUIContent("当前配置"), config_file_select, config_file_list.ToArray(), new[] { GUILayout.Width(560),GUILayout.Height(20) });
+        EditorGUI.BeginDisabledGroup(is_editing_custom_setting_list);
+        if (GEditorGUI.Button("新建", 60, 20))
+        {
+            is_editing_custom_setting_list = true;
+        }
+        EditorGUI.EndDisabledGroup();
+        EditorGUILayout.EndHorizontal();
         EditorGUI.BeginChangeCheck();
-        EditorGUI.BeginDisabledGroup(!is_editing_language_list);
+        EditorGUI.BeginDisabledGroup(!is_editing_custom_setting_list);
         EditorGUILayout.PropertyField(ui_gameobject_list_property, new GUIContent("UI预制体列表"), true);
         EditorGUILayout.PropertyField(ui_language_list_property, new GUIContent("语言列表"), true);
-        EditorGUI.EndDisabledGroup();
-        EditorGUILayout.Space(5);
+
+        EditorGUILayout.Space(15);
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
-        if (GUILayout.Button(is_editing_language_list ? "保存" : "编辑", new[] { GUILayout.Width(60), GUILayout.Height(20) }))
+        if (GEditorGUI.Button("取消", 80, 20))
         {
-            if (is_editing_language_list)
+            if (EditorUtility.DisplayDialog("警告", "取消后当前的配置信息将不会保存。\n是否执行取消操作。", "确认", "取消"))
             {
-                gird_width = (int)position.width / (ui_language_list.Count + 1);
+                is_editing_custom_setting_list = false;
+            }
+        }
+        if (GEditorGUI.Button("保存", 60, 20))
+        {
+            if (is_editing_custom_setting_list)
+            {
+                /*
                 ChangeCustomConfig();
+                SaveLocalizationCustomSetting();
+                */
+                string path = EditorUtility.SaveFilePanel("保存新的配置到", Configs.Instance.Editor_EditorConfigFolderPath, "New Config", "xml");
+                if (!path.Equals(""))
+                {
+                    string configFileName = Path.GetFileNameWithoutExtension(path);
+                    SaveLocalizationCustomSetting(path);
+                    is_editing_custom_setting_list = !is_editing_custom_setting_list;
+                }
+
             }
             else
-                UpdateLanguageIndex();
-            is_editing_language_list = !is_editing_language_list;
-        }
-        if (GUILayout.Button("更新xlsx", new[] { GUILayout.Width(60), GUILayout.Height(20) }))
-        {
-            if (EditorUtility.DisplayDialog("重要警告", "此操作将会覆盖原本的数据，请确定是否操作。", "确认", "取消"))
             {
-                ExcelUtil.Write(Configs.Instance.LocalizationLanguageConfigFilePath, ui_excel_data);
-                GDebug.Instance.Log("更新了language_localization.xlsx");
+                UpdateLanguageIndex();
             }
         }
         GUILayout.EndHorizontal();
+        EditorGUI.EndDisabledGroup();
+
+
         if (EditorGUI.EndChangeCheck())
         {
             _this.ApplyModifiedProperties();
@@ -166,7 +214,6 @@ public class LanguageLocalizationWindow : EditorWindow
     [SerializeField] private List<string> ui_game_object_name_list = new List<string>();
     [SerializeField] private Dictionary<int, GameObject> ui_language_elem_dic = new Dictionary<int, GameObject>();
     private int ui_gameobject_selected = 0;
-    private bool is_editing_language_list = false;
     private int gird_width = 0;
 
 
@@ -351,7 +398,7 @@ public class LanguageLocalizationWindow : EditorWindow
             {
                 if (locals.Length != 0)
                 {
-                    ui_localization_editor_info.isShow = false;
+                    ui_localization_editor_info.SetState(false);
                     foreach (var l in locals)
                     {
                         ui_language_elem_dic.Add(ui_table_data.Count, l.gameObject);
@@ -364,25 +411,13 @@ public class LanguageLocalizationWindow : EditorWindow
                     _this.Update();
                 }
                 else
-                {
-                    ui_localization_editor_info.isShow = true;
-                    ui_localization_editor_info.msgType = MessageType.Warning;
-                    ui_localization_editor_info.msg = $"[{ui_gameobject.name}]未找到LanguageElem组件";
-                }
+                    ui_localization_editor_info.SetState(true, $"[{ui_gameobject.name}]未找到LanguageElem组件", MessageType.Warning);
             }
             else
-            {
-                ui_localization_editor_info.isShow = true;
-                ui_localization_editor_info.msgType = MessageType.Warning;
-                ui_localization_editor_info.msg = $"[{ui_gameobject.name}]未找到LanguageElem组件";
-            }
+                ui_localization_editor_info.SetState(true, $"[{ui_gameobject.name}]未找到LanguageElem组件", MessageType.Warning);
         }
         else
-        {
-            ui_localization_editor_info.isShow = true;
-            ui_localization_editor_info.msgType = MessageType.Warning;
-            ui_localization_editor_info.msg = $"[当前选择的GameObject为空]";
-        }
+            ui_localization_editor_info.SetState(true, $"[当前选择的GameObject为空]", MessageType.Warning);
     }
 
 

@@ -7,6 +7,11 @@ using UnityEngine;
 public class LocalizationLanguageEditorConfig
 {
     /// <summary>
+    /// 本地化Excel文件路径信息
+    /// </summary>
+    public string languageLocalizationExcelFilePath;
+
+    /// <summary>
     /// UI游戏对象路径列表
     /// </summary>
     public List<string> gameObjectPathsInProject;
@@ -19,13 +24,28 @@ public class LocalizationLanguageEditorConfig
     /// <summary>
     /// 语言列表中的索引
     /// </summary>
-    public Dictionary<string, int> language_index;
+    private Dictionary<string, int> language_index;
 
     public LocalizationLanguageEditorConfig()
     {
         gameObjectPathsInProject = new List<string>();
         languageList = new List<string>();
         language_index = new Dictionary<string, int>();
+    }
+
+    public void UpdateLanguageIndexDic()
+    {
+        language_index.Clear();
+        for (int index = 0; index < languageList.Count; index++)
+            language_index.Add(languageList[index], index);
+    }
+
+    public int GetLanguageIndex(string language)
+    {
+        if (language_index.ContainsKey(language))
+            return language_index[language];
+        else
+            return -1;
     }
 
 }

@@ -137,7 +137,7 @@ public class UIManagerWindow : EditorWindow
         EditorGUI.BeginDisabledGroup(true);
         EditorGUILayout.TextArea(ui_panel_key_log, new[] { GUILayout.Height(80 * ui_panel_prefab_list.Count) });
         EditorGUI.EndDisabledGroup();
-        if (ui_panel_list_help_info.isShow) EditorGUILayout.HelpBox(ui_panel_list_help_info.msg, ui_panel_list_help_info.msgType);
+        ui_panel_list_help_info.Show();
 
         if (EditorGUI.EndChangeCheck())
         {
@@ -172,13 +172,11 @@ public class UIManagerWindow : EditorWindow
             }
             else 
             {
-                ui_panel_list_help_info.isShow = true;
-                ui_panel_list_help_info.msg = $"索引{index}处\n存在相同键值[{ui_panel_prefab_list[index].key}]\nor\n存在相同的AssetReference";
-                ui_panel_list_help_info.msgType = MessageType.Error;
+                ui_panel_list_help_info.SetState(true, $"索引{index}处\n存在相同键值[{ui_panel_prefab_list[index].key}]\nor\n存在相同的AssetReference", MessageType.Error);
                 return false;
             }
         }
-        ui_panel_list_help_info.isShow = false;
+        ui_panel_list_help_info.SetState(false);
         return true;
     }
 }

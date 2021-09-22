@@ -5,21 +5,6 @@ using UnityEditor;
 using System.IO;
 using Framework.DataManager;
 
-public class HelpInfo
-{
-    public bool isShow = false;
-    public string msg = "";
-    public MessageType msgType;
-
-    public bool Show(int space = 5)
-    {
-        EditorGUILayout.Space(space);
-        if (isShow)
-            EditorGUILayout.HelpBox(msg, msgType);
-        return isShow;
-    }
-}
-
 public class InputManagerWindow : EditorWindow
 {
     private static InputManagerWindow _im_window;
@@ -86,14 +71,13 @@ public class InputManagerWindow : EditorWindow
                 XBoxOneInputConfig xboxInputConfigs = XmlUtil.DeserializeFromFile<XBoxOneInputConfig>(path);
                 handle_btns_list = xboxInputConfigs.HandleKey;
                 handle_axis_list = xboxInputConfigs.HandleAxis;
-                exists_file_msg_info.isShow = false;
+                exists_file_msg_info.SetState(false);
             }
             else
             {
                 Debug.Log($"{path}不存在");
-                exists_file_msg_info.isShow = true;
-                exists_file_msg_info.msg = "加载错误，该路径不存在";
-                exists_file_msg_info.msgType = MessageType.Error;
+
+                exists_file_msg_info.SetState(true, "加载错误，该路径不存在", MessageType.Error);
             }
         }
 
@@ -112,8 +96,7 @@ public class InputManagerWindow : EditorWindow
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(handle_btns_list_Property, true);
         EditorGUILayout.PropertyField(handle_axis_list_Property, true);
-        if (exists_file_msg_info.isShow)
-            EditorGUILayout.HelpBox(exists_file_msg_info.msg, exists_file_msg_info.msgType);
+        exists_file_msg_info.Show();
 
 
         EditorGUILayout.Space(50);
@@ -133,15 +116,10 @@ public class InputManagerWindow : EditorWindow
             if (File.Exists(path))
             {
                 GAME_INPUT_CONFIG = XmlUtil.DeserializeFromFile<GameInputConfig>(path);
-                editor_game_input_config_Info.isShow = false;
+                editor_game_input_config_Info.SetState(false);
             }
             else
-            {
-                //Debug.Log($"{path}不存在");
-                editor_game_input_config_Info.isShow = true;
-                editor_game_input_config_Info.msg = "加载错误，该路径不存在";
-                editor_game_input_config_Info.msgType = MessageType.Error;
-            }
+                editor_game_input_config_Info.SetState(true, "加载错误，该路径不存在", MessageType.Error);
         }
 
         if (GUILayout.Button("保存修改(不可撤销)", new[] { GUILayout.Width(150), GUILayout.Height(50) }))
@@ -168,8 +146,7 @@ public class InputManagerWindow : EditorWindow
         EditorGUI.BeginDisabledGroup(true);
         EditorGUILayout.TextArea(action_log, new[] { GUILayout.Height(200) });
         EditorGUI.EndDisabledGroup();
-        if (editor_game_input_config_Info.isShow)
-            EditorGUILayout.HelpBox(editor_game_input_config_Info.msg, editor_game_input_config_Info.msgType);
+        editor_game_input_config_Info.Show();
         GUILayout.EndScrollView();
     }
 
@@ -187,9 +164,7 @@ public class InputManagerWindow : EditorWindow
             }
             else
             {
-                editor_game_input_config_Info.isShow = true;
-                editor_game_input_config_Info.msg = "存在相同键值[位于handle_btns]";
-                editor_game_input_config_Info.msgType = MessageType.Error;
+                editor_game_input_config_Info.SetState(true, "存在相同键值[位于handle_btns]", MessageType.Error);
                 return false;
             }
                 
@@ -204,9 +179,7 @@ public class InputManagerWindow : EditorWindow
             }
             else
             {
-                editor_game_input_config_Info.isShow = true;
-                editor_game_input_config_Info.msg = "存在相同键值[位于handle_axis]";
-                editor_game_input_config_Info.msgType = MessageType.Error;
+                editor_game_input_config_Info.SetState(true, "存在相同键值[位于handle_axis]", MessageType.Error);
                 return false;
             }
 
@@ -222,14 +195,12 @@ public class InputManagerWindow : EditorWindow
             }
             else
             {
-                editor_game_input_config_Info.isShow = true;
-                editor_game_input_config_Info.msg = "存在相同键值[位于keyboard_btns]";
-                editor_game_input_config_Info.msgType = MessageType.Error;
+                editor_game_input_config_Info.SetState(true, "存在相同键值[位于keyboard_btns]", MessageType.Error);
                 return false;
             }
 
         }
-        editor_game_input_config_Info.isShow = false;
+        editor_game_input_config_Info.SetState(false);
         if (action_log == default)
             action_log = "当前未设置任何键值";
         return true;

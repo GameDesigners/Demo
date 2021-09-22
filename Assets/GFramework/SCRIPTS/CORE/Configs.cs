@@ -44,7 +44,7 @@ public class Configs
         Editor_EditorConfigFolderPath = Editor_ProjectRootFolderPath + "/EditorConfigs/";
 
 
-        Editor_LanguageLocalizationConfigFilePath = $"{Editor_ProjectRootFolderPath}/EditorConfig/language_localization_window_config.xml";
+        Editor_LanguageLocalizationConfigFilePath = $"{Editor_EditorConfigFolderPath}language_localization_window_config.xml";
 #else
         LogFolderPath = Application.streamingAssetsPath + "/Logs/";
 #endif

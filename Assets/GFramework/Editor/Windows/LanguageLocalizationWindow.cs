@@ -3,32 +3,16 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using System.Linq;
-using UnityEngine.AddressableAssets;
+using System.IO;
+using Framework.DataManager;
 
 public class LanguageLocalizationWindow : EditorWindow
 {
     private static LanguageLocalizationWindow _llw_window;
     private Vector2 scrollPos = Vector2.zero;
-
-    //serialize data
     private SerializedObject _this;
-    private SerializedProperty ui_gameobject_list_property;
-    private SerializedProperty ui_language_list_property;
 
-    [SerializeField] private List<GameObject> ui_gameobject_list = new List<GameObject>();
-    [SerializeField] private List<string> ui_game_object_name_list = new List<string>();
-    [SerializeField] private List<string> ui_language_list = new List<string>();
-    [SerializeField] private Dictionary<int, GameObject> ui_language_elem_dic = new Dictionary<int, GameObject>();
-    private int ui_gameobject_selected = 0;
-    private bool is_editing_language_list = false;
-    private int gird_width = 0;
-
-    private List<List<string>> ui_table_data = new List<List<string>>();
-    private ExcelData ui_excel_data = new ExcelData();
-    private Dictionary<string, int> language_index = new Dictionary<string, int>();
-
-    private HelpInfo ui_localization_editor_info = new HelpInfo();
-
+    //===========================================================================
     [MenuItem("GFrameworkEditorWindows/LanguageLocalizationWindow")]
     private static void Open()
     {
@@ -46,15 +30,73 @@ public class LanguageLocalizationWindow : EditorWindow
 
         gird_width = (int)position.width / (ui_language_list.Count + 1);
 
+
+        LoadLocalizationCustomSetting();
         UpdateLanguageIndex();
         ChangeCustomConfig();
         ChangeGameObject();
+
+        Debug.Log("Call OnEnable()");
+    }
+    //===========================================================================
+
+
+
+    #region 本地化常规设置部分
+    private SerializedProperty ui_gameobject_list_property;
+    private SerializedProperty ui_language_list_property;
+
+    [SerializeField] private List<GameObject> ui_gameobject_list=new List<GameObject>();
+    [SerializeField] private List<string> ui_language_list = new List<string>();
+
+    /// <summary>
+    /// 加载关于本地化常规设置配置
+    /// </summary>
+    private void LoadLocalizationCustomSetting()
+    {
+        if (!Directory.Exists(Configs.Instance.Editor_EditorConfigFolderPath))
+        {
+            Directory.CreateDirectory(Configs.Instance.Editor_EditorConfigFolderPath);
+            return;
+        }
+
+        if(File.Exists(Configs.Instance.Editor_LanguageLocalizationConfigFilePath))
+        {
+            LocalizationLanguageEditorConfig lle_config = XmlUtil.DeserializeFromFile<LocalizationLanguageEditorConfig>(Configs.Instance.Editor_LanguageLocalizationConfigFilePath);
+            if(lle_config!=default)
+            {
+                ui_gameobject_list.Clear();
+                if (lle_config.gameObjectPathsInProject!=null)
+                {
+                    foreach(var path in lle_config.gameObjectPathsInProject)
+                        ui_gameobject_list.Add(AssetDatabase.LoadAssetAtPath<GameObject>(path));
+                }
+
+                if(lle_config.languageList!=null)
+                {
+                    ui_language_list.Clear();
+                    foreach (var l in lle_config.languageList)
+                        ui_language_list.Add(l);
+                }
+            }
+        }
     }
 
-    private void OnGUI()
+    private void SaveLocalizationCustomSetting()
     {
-        scrollPos = GUILayout.BeginScrollView(scrollPos);
-        gird_width = ((int)position.width-10) / (ui_language_list.Count + 1)-5;
+        if (!Directory.Exists(Configs.Instance.Editor_EditorConfigFolderPath))
+            Directory.CreateDirectory(Configs.Instance.Editor_EditorConfigFolderPath);
+        if (File.Exists(Configs.Instance.Editor_LanguageLocalizationConfigFilePath))
+            File.Delete(Configs.Instance.Editor_LanguageLocalizationConfigFilePath);
+
+        LocalizationLanguageEditorConfig lle_config = new LocalizationLanguageEditorConfig();
+    }
+
+    /// <summary>
+    /// 本地化常规设置GUI渲染函数
+    /// </summary>
+    private void LocalizationCustomSettingGUI()
+    {
         EditorGUILayout.Space(10);
         EditorGUILayout.LabelField("本地化常规设置", EditorGUIStyles.Instance.TitleStyle, new[] { GUILayout.Height(30) });
         EditorGUI.BeginChangeCheck();
@@ -78,9 +120,9 @@ public class LanguageLocalizationWindow : EditorWindow
         }
         if (GUILayout.Button("更新xlsx", new[] { GUILayout.Width(60), GUILayout.Height(20) }))
         {
-            if(EditorUtility.DisplayDialog("重要警告", "此操作将会覆盖原本的数据，请确定是否操作。", "确认", "取消"))
+            if (EditorUtility.DisplayDialog("重要警告", "此操作将会覆盖原本的数据，请确定是否操作。", "确认", "取消"))
             {
-                ExcelUtil.Write(Application.streamingAssetsPath + "/language_localization.xlsx", ui_excel_data);
+                ExcelUtil.Write(Configs.Instance.LocalizationLanguageConfigFilePath, ui_excel_data);
                 GDebug.Instance.Log("更新了language_localization.xlsx");
             }
         }
@@ -92,7 +134,59 @@ public class LanguageLocalizationWindow : EditorWindow
             foreach (var obj in ui_gameobject_list)
                 ui_game_object_name_list.Add(obj.name);
         }
+    }
 
+
+    #endregion
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    [SerializeField] private List<string> ui_game_object_name_list = new List<string>();
+    [SerializeField] private Dictionary<int, GameObject> ui_language_elem_dic = new Dictionary<int, GameObject>();
+    private int ui_gameobject_selected = 0;
+    private bool is_editing_language_list = false;
+    private int gird_width = 0;
+
+
+    private LocalizationLanguageEditorConfig editor_setting = new LocalizationLanguageEditorConfig();
+
+    private List<List<string>> ui_table_data = new List<List<string>>();
+    private ExcelData ui_excel_data = new ExcelData();
+    private Dictionary<string, int> language_index = new Dictionary<string, int>();
+
+    private HelpInfo ui_localization_editor_info = new HelpInfo();
+
+    
+    
+
+    private void OnGUI()
+    {
+        scrollPos = GUILayout.BeginScrollView(scrollPos);
+        gird_width = ((int)position.width-10) / (ui_language_list.Count + 1)-5;
+
+        LocalizationCustomSettingGUI();
 
 
         EditorGUILayout.Space(20);
@@ -145,6 +239,8 @@ public class LanguageLocalizationWindow : EditorWindow
                     if (ui_excel_data.ContainsKey(name))
                         ui_excel_data[name] = ui_table_data;
                     ExcelUtil.Write(Application.streamingAssetsPath + "/language_localization.xlsx", ui_excel_data);
+
+
                     foreach (var e in ui_language_elem_dic)
                     {
                         if (e.Key < ui_table_data.Count)
@@ -167,6 +263,16 @@ public class LanguageLocalizationWindow : EditorWindow
             _this.ApplyModifiedProperties();
         }
         GUILayout.EndScrollView();
+    }
+
+
+    /// <summary>
+    /// 加载本地文件记录的数据
+    /// </summary>
+    private void LoadLocalFileRecordData()
+    {
+        ui_excel_data = ExcelUtil.Read(Configs.Instance.LocalizationLanguageConfigFilePath);
+        ui_gameobject_list.Add(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/TestFiles/Prefabs/@gaming_page.prefab"));
     }
 
     /// <summary>
@@ -194,7 +300,7 @@ public class LanguageLocalizationWindow : EditorWindow
                     var query = (from r in tb
                                 where r[0] == l.key
                                 select r).ToList();
-                    if(query.Count>1)
+                    if(query.Count>=1)
                     {
                         //需要原来xlsx文件上记录的东西拷贝到新的Data上
                         foreach (var language in ui_language_list)
@@ -235,7 +341,9 @@ public class LanguageLocalizationWindow : EditorWindow
         title_list.AddRange(ui_language_list);
 
         ui_table_data.Add(title_list);
-        GameObject ui_gameobject = ui_gameobject_list[ui_gameobject_selected];
+        GameObject ui_gameobject = null;
+        if (ui_gameobject_list.Count > ui_gameobject_selected)
+            ui_gameobject = ui_gameobject_list[ui_gameobject_selected];
         if (ui_gameobject != null)
         {
             GUILocalization[] locals = ui_gameobject.GetComponentsInChildren<GUILocalization>();
@@ -246,7 +354,7 @@ public class LanguageLocalizationWindow : EditorWindow
                     ui_localization_editor_info.isShow = false;
                     foreach (var l in locals)
                     {
-                        ui_language_elem_dic.Add(ui_table_data.Count,l.gameObject);
+                        ui_language_elem_dic.Add(ui_table_data.Count, l.gameObject);
                         List<string> default_list = new List<string>();
                         default_list.Add(l.key == "" ? l.gameObject.name : l.key);
                         for (int i = 0; i < ui_language_list.Count; i++)
@@ -273,7 +381,7 @@ public class LanguageLocalizationWindow : EditorWindow
         {
             ui_localization_editor_info.isShow = true;
             ui_localization_editor_info.msgType = MessageType.Warning;
-            ui_localization_editor_info.msg = $"[{ui_gameobject.name}]当前选择的GameObject为空";
+            ui_localization_editor_info.msg = $"[当前选择的GameObject为空]";
         }
     }
 

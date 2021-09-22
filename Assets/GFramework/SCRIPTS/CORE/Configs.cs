@@ -9,13 +9,27 @@ public class Configs
      * Folder Path
      */
     public string InputConfigFolderPath;
-    public string LogFolderPath;
     public string UIConfigFolderPath;
 
     /*
      * Files Path
      */
     public string UIPrefabsConfigPath;
+    public string LocalizationLanguageConfigFilePath;
+
+
+
+
+
+    /*
+     * Editor Config File Path
+     */
+#if UNITY_EDITOR
+    public string Editor_ProjectRootFolderPath;
+    public string Editor_LogFolderPath;
+    public string Editor_EditorConfigFolderPath;
+    public string Editor_LanguageLocalizationConfigFilePath;
+#endif
 
     public Configs()
     {
@@ -25,14 +39,20 @@ public class Configs
 
 #if UNITY_EDITOR
         DirectoryInfo di = new DirectoryInfo(Application.streamingAssetsPath);
-        string preDirectory = di.Parent.Parent.FullName;
-        LogFolderPath = preDirectory + "/Logs/";
+        Editor_ProjectRootFolderPath = di.Parent.Parent.FullName;
+        Editor_LogFolderPath = Editor_ProjectRootFolderPath + "/Logs/";
+        Editor_EditorConfigFolderPath = Editor_ProjectRootFolderPath + "/EditorConfigs/";
+
+
+        Editor_LanguageLocalizationConfigFilePath = $"{Editor_ProjectRootFolderPath}/EditorConfig/language_localization_window_config.xml";
 #else
         LogFolderPath = Application.streamingAssetsPath + "/Logs/";
 #endif
 
 
         UIPrefabsConfigPath = $"{UIConfigFolderPath}ui_panel_prefabs_config.xml";
+        LocalizationLanguageConfigFilePath = $"{Application.streamingAssetsPath}/language_localization.xlsx";
+
     }
 
     private static Configs _instance;

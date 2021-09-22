@@ -33,9 +33,9 @@ public class GDebug
 
     private GDebug()
     {
-        if(!Directory.Exists(Configs.Instance.LogFolderPath))
-            Directory.CreateDirectory(Configs.Instance.LogFolderPath);
-        path = $"{Configs.Instance.LogFolderPath}[log]{DataTimeUtil.GetTimeStampForFileName()}.txt";
+        if(!Directory.Exists(Configs.Instance.Editor_LogFolderPath))
+            Directory.CreateDirectory(Configs.Instance.Editor_LogFolderPath);
+        path = $"{Configs.Instance.Editor_LogFolderPath}[log]{DataTimeUtil.GetTimeStampForFileName()}.txt";
         ClearLogFiles();
     }
 
@@ -131,7 +131,7 @@ public class GDebug
     /// </summary>
     private void ClearLogFiles()
     {
-        DirectoryInfo folder = new DirectoryInfo(Configs.Instance.LogFolderPath);
+        DirectoryInfo folder = new DirectoryInfo(Configs.Instance.Editor_LogFolderPath);
         FileInfo[] files = folder.GetFiles("*.txt");
         var filter = (
                        from r in files

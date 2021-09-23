@@ -1,8 +1,14 @@
 <?xml version="1.0"?>
 <ConfigFilePaths xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <selectedPaths>E:/ZhuSenlin Project/[0]Game Dev Projects/UnityGameFrameworkDemo/EditorConfigs/02.config</selectedPaths>
+  <selectedPaths>F:/GithubProjects/Demo/EditorConfigs/01.config</selectedPaths>
   <paths>
-    <string>E:/ZhuSenlin Project/[0]Game Dev Projects/UnityGameFrameworkDemo/EditorConfigs/01.config</string>
-    <string>E:/ZhuSenlin Project/[0]Game Dev Projects/UnityGameFrameworkDemo/EditorConfigs/02.config</string>
+    <string>F:/GithubProjects/Demo/EditorConfigs/01.config</string>
+    <string>F:/GithubProjects/Demo/EditorConfigs/02.config</string>
+    <string>F:/GithubProjects/Demo/EditorConfigs/03.config</string>
   </paths>
+  <relativePaths>
+    <string>EditorConfigs/01.config</string>
+    <string>EditorConfigs/02.config</string>
+    <string>EditorConfigs/03.config</string>
+  </relativePaths>
 </ConfigFilePaths>

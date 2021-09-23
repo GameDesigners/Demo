@@ -60,6 +60,7 @@ public class ConfigFilePaths
 {
     public string selectedPaths;
     public List<string> paths;
+    public List<string> relativePaths;
 }
 
 public class LanguageLocalizationConfigsManager
@@ -69,6 +70,7 @@ public class LanguageLocalizationConfigsManager
     private static LanguageLocalizationConfigsManager _instance;
     private ConfigFilePaths configFilePaths;
     private List<string> deleteRecord;
+    private string projectRootPath="";
 
     public static LanguageLocalizationConfigsManager Instance
     {
@@ -83,7 +85,7 @@ public class LanguageLocalizationConfigsManager
     public List<string> GetPaths() => configFilePaths.paths;
     public bool IsHavePaths() => configFilePaths.paths.Count != 0;
     public bool IsDeleteRecordEmpty() => deleteRecord.Count == 0;
-    public string GetSelectedName() => configFilePaths.selectedPaths;
+    public string GetSelectedPath() => configFilePaths.selectedPaths;
 
     public int GetSelectedConfigFileIndex() => ConfigFileIndex(configFilePaths.selectedPaths);
     public int ConfigFileIndex(string selectFilePath)
@@ -96,17 +98,25 @@ public class LanguageLocalizationConfigsManager
         return -1;
     }
 
+    public string GetFullFilePathBaseOnProjectRootPath(string relativePath) => projectRootPath + relativePath;
+
     public LanguageLocalizationConfigsManager()
     {
+        projectRootPath = Configs.Instance.Editor_ProjectRootFolderPath.Replace("\\", "/") + "/";
+
         deleteRecord = new List<string>();
         configFilePaths = default;
         if (File.Exists(Configs.Instance.Editor_LanguageLocalizationConfigFilePath))
+        {
             configFilePaths = XmlUtil.DeserializeFromFile<ConfigFilePaths>(Configs.Instance.Editor_LanguageLocalizationConfigFilePath);
+        }
         else
         {
+            Debug.Log("NONE");
             configFilePaths = new ConfigFilePaths();
             configFilePaths.selectedPaths = "";
             configFilePaths.paths = new List<string>();
+            configFilePaths.relativePaths = new List<string>();
             XmlUtil.Serialize(configFilePaths, Configs.Instance.Editor_LanguageLocalizationConfigFilePath);
         }
 
@@ -127,6 +137,7 @@ public class LanguageLocalizationConfigsManager
             return false;
 
         configFilePaths.paths.Add(path);
+        configFilePaths.relativePaths.Add(path.Replace(projectRootPath, ""));
         configFilePaths.selectedPaths = path;
         return true;
     }
@@ -143,10 +154,11 @@ public class LanguageLocalizationConfigsManager
             configFilePaths.paths = new List<string>();
             return false;
         }
-        if (!configFilePaths.paths.Contains(path))
+        if (!configFilePaths.paths.Contains(path)&&!configFilePaths.relativePaths.Contains(path.Replace(projectRootPath, "")))
             return false;
 
         configFilePaths.paths.Remove(path);
+        configFilePaths.relativePaths.Remove(path.Replace(projectRootPath, ""));
         deleteRecord.Add(path);
         return true;
     }
@@ -167,9 +179,7 @@ public class LanguageLocalizationConfigsManager
             Directory.CreateDirectory(Configs.Instance.Editor_EditorConfigFolderPath);
         if (File.Exists(Configs.Instance.Editor_LanguageLocalizationConfigFilePath))
             File.Delete(Configs.Instance.Editor_LanguageLocalizationConfigFilePath);
-
         XmlUtil.Serialize(configFilePaths, Configs.Instance.Editor_LanguageLocalizationConfigFilePath);
-
         foreach (var p in deleteRecord)
             if (File.Exists(p))
                 File.Delete(p);
@@ -185,9 +195,20 @@ public class LanguageLocalizationConfigsManager
         {
             if (!File.Exists(configFilePaths.paths[index]))
             {
-                if (configFilePaths.paths[index] == configFilePaths.selectedPaths)
-                    configFilePaths.selectedPaths = "";
-                configFilePaths.paths.Remove(configFilePaths.paths[index]);
+                //检查相对路径,若相对路径检查到有文件存在，则修改配置，若不存在则删除
+                string newAbsolutePath = GetFullFilePathBaseOnProjectRootPath(configFilePaths.relativePaths[index]);
+                if (File.Exists(newAbsolutePath))
+                {
+                    if (configFilePaths.paths[index] == configFilePaths.selectedPaths)
+                        configFilePaths.selectedPaths = newAbsolutePath;
+                    configFilePaths.paths[index] = newAbsolutePath;
+                }
+                else
+                {
+                    if (configFilePaths.paths[index] == configFilePaths.selectedPaths)
+                        configFilePaths.selectedPaths = "";
+                    configFilePaths.paths.Remove(configFilePaths.paths[index]);
+                }
             }
         }
         SaveToLocalFile();
@@ -201,5 +222,18 @@ public class LanguageLocalizationConfigsManager
         else
             configFilePaths.selectedPaths = "";
         SaveToLocalFile();
+    }
+}
+
+
+public class EditorExcelRowData
+{
+    public GUILocalization comp;
+    public List<string> row_data;
+
+    public EditorExcelRowData(GUILocalization _comp,List<string> rd)
+    {
+        comp = _comp;
+        row_data = rd;
     }
 }

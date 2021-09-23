@@ -52,8 +52,12 @@ public class GEditorGUI
         EditorGUILayout.Space(space);
         EditorGUILayout.LabelField(title, EditorGUIStyles.Instance.TitleStyle, new[] { GUILayout.Height(height) });
     }
-    public static void Label(string text, int width=0, int height=0)
+
+    public static void Label(string text, int width = 0, int height = 0, int space = 0)
     {
+        if (space != 0)
+            EditorGUILayout.Space(space);
+
         if (width == 0 && height != 0)
             EditorGUILayout.LabelField(text, new[] { GUILayout.Height(height) });
         else if (width != 0 && height == 0)
@@ -62,7 +66,6 @@ public class GEditorGUI
             EditorGUILayout.LabelField(text);
         else
             EditorGUILayout.LabelField(text, new[] { GUILayout.Width(width), GUILayout.Height(height) });
-
     }
     public static bool Button(string text, int width, int height) => GUILayout.Button(text, new[] { GUILayout.Width(width), GUILayout.Height(height) });
 }

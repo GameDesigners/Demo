@@ -8,7 +8,15 @@ public class TestUI : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        List<List<string>> data;
+        Debug.Log(Configs.Instance.Editor_ProjectRootFolderPath);
+        string s = Configs.Instance.Editor_ProjectRootFolderPath.Replace("\\", "/");
+        Debug.Log(Configs.Instance.Editor_ProjectRootFolderPath);
+        s += "/";
+        Debug.Log($"s:{s}");
+        string abstractPath = "F:/GithubProjects/Demo/EditorConfigs/01.config";
+        string local=abstractPath.Replace(s, "");
+        Debug.Log($"local:{local}");
+        //List<List<string>> data;
         /*
         List<string> col1 = new List<string>();
         col1.Add("key");

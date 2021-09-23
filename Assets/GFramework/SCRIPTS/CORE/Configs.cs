@@ -10,6 +10,7 @@ public class Configs
      */
     public string InputConfigFolderPath;
     public string UIConfigFolderPath;
+    public string LanguageLocalizationFolderPath;
 
     /*
      * Files Path
@@ -35,6 +36,7 @@ public class Configs
     {
         InputConfigFolderPath = Application.streamingAssetsPath + "/InputConfigs/";
         UIConfigFolderPath = Application.streamingAssetsPath + "/UIConfigs/";
+        LanguageLocalizationFolderPath = Application.streamingAssetsPath + "/LanguageLocalizatons/";
 
 
 #if UNITY_EDITOR

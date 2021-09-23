@@ -6,6 +6,10 @@ using System.Linq;
 using System.IO;
 using Framework.DataManager;
 
+
+
+
+
 public class LanguageLocalizationWindow : EditorWindow
 {
     private static LanguageLocalizationWindow _llw_window;
@@ -20,220 +24,29 @@ public class LanguageLocalizationWindow : EditorWindow
             _llw_window = GetWindow<LanguageLocalizationWindow>();
         _llw_window.minSize = new Vector2(800, 600);
     }
-
     private void OnEnable()
     {
         _this = new SerializedObject(this);
 
         ui_gameobject_list_property = _this.FindProperty("ui_gameobject_list");
         ui_language_list_property = _this.FindProperty("ui_language_list");
-        ui_ui_new_setting_file_name_property = _this.FindProperty("ui_ui_new_setting_file_name");
 
         gird_width = (int)position.width / (ui_language_list.Count + 1);
 
-
-        LoadLocalizationCustomSetting();
+        LocalizationCustomSettingInitialization();
+        //LoadLocalizationCustomSetting();
         UpdateLanguageIndex();
         ChangeCustomConfig();
         ChangeGameObject();
 
         Debug.Log("Call OnEnable()");
     }
-
-    private void OnDisable()
-    {
-        //SaveLocalizationCustomSetting();
-    }
-    //===========================================================================
-
-
-
-    #region 本地化常规设置部分
-    private SerializedProperty ui_gameobject_list_property;
-    private SerializedProperty ui_language_list_property;
-    private SerializedProperty ui_ui_new_setting_file_name_property;
-
-    [SerializeField] private List<GameObject> ui_gameobject_list=new List<GameObject>();
-    [SerializeField] private List<string> ui_language_list = new List<string>();
-
-    private List<string> config_file_list = new List<string>();
-    private bool is_editing_custom_setting_list = false;  //是否正在编辑本地常规化设置
-    private int config_file_select = 0;
-
-    /// <summary>
-    /// 加载关于本地化常规设置配置
-    /// </summary>
-    private void LoadLocalizationCustomSetting()
-    {
-        config_file_list.Clear();
-        config_file_list.Add("None");
-        string[] filePaths = Directory.GetFiles(Configs.Instance.Editor_EditorConfigFolderPath);
-        config_file_list.AddRange(filePaths.ToList());
-        if (!Directory.Exists(Configs.Instance.Editor_EditorConfigFolderPath))
-        {
-            Directory.CreateDirectory(Configs.Instance.Editor_EditorConfigFolderPath);
-            return;
-        }
-
-        if(File.Exists(Configs.Instance.Editor_LanguageLocalizationConfigFilePath))
-        {
-            LocalizationLanguageEditorConfig lle_config = XmlUtil.DeserializeFromFile<LocalizationLanguageEditorConfig>(Configs.Instance.Editor_LanguageLocalizationConfigFilePath);
-            if(lle_config!=default)
-            {
-                ui_gameobject_list.Clear();
-                if (lle_config.gameObjectPathsInProject!=null)
-                {
-                    foreach(var path in lle_config.gameObjectPathsInProject)
-                        ui_gameobject_list.Add(AssetDatabase.LoadAssetAtPath<GameObject>(path));
-                }
-
-                if(lle_config.languageList!=null)
-                {
-                    ui_language_list.Clear();
-                    foreach (var l in lle_config.languageList)
-                        ui_language_list.Add(l);
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// 保存关于本地化常规设置配置
-    /// </summary>
-    private void SaveLocalizationCustomSetting(string path)
-    {
-        if (File.Exists(path))
-            File.Delete(path);
-
-        LocalizationLanguageEditorConfig lle_config = new LocalizationLanguageEditorConfig();
-        foreach (var o in ui_gameobject_list)
-            lle_config.gameObjectPathsInProject.Add(AssetDatabase.GetAssetPath(o));
-        lle_config.languageList = ui_language_list;
-        lle_config.UpdateLanguageIndexDic();
-        XmlUtil.Serialize(lle_config, path);
-    }
-
-    /// <summary>
-    /// 本地化常规设置GUI渲染函数
-    /// </summary>
-    private void LocalizationCustomSettingGUI()
-    {
-        GEditorGUI.Title("本地化常规设置");
-        /*
-        GEditorGUI.Label("TIPS:\n1.编辑器的存储Key包含预制体的名称，因此预制体的名称很重要。除非万不得已，不要修改！\n" +
-                                "2.若要修改，则建议选择创建新Excel模板的创建模式。\n" +
-                                "3.修改此处的设置为高位行为。建议【宜添加不宜修改】"
-                                , height:70);
-        */
-        EditorGUILayout.BeginHorizontal();
-        config_file_select = EditorGUILayout.Popup(new GUIContent("当前配置"), config_file_select, config_file_list.ToArray(), new[] { GUILayout.Width(560),GUILayout.Height(20) });
-        EditorGUI.BeginDisabledGroup(is_editing_custom_setting_list);
-        if (GEditorGUI.Button("新建", 60, 20))
-        {
-            is_editing_custom_setting_list = true;
-        }
-        EditorGUI.EndDisabledGroup();
-        EditorGUILayout.EndHorizontal();
-        EditorGUI.BeginChangeCheck();
-        EditorGUI.BeginDisabledGroup(!is_editing_custom_setting_list);
-        EditorGUILayout.PropertyField(ui_gameobject_list_property, new GUIContent("UI预制体列表"), true);
-        EditorGUILayout.PropertyField(ui_language_list_property, new GUIContent("语言列表"), true);
-
-        EditorGUILayout.Space(15);
-        GUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
-        if (GEditorGUI.Button("取消", 80, 20))
-        {
-            if (EditorUtility.DisplayDialog("警告", "取消后当前的配置信息将不会保存。\n是否执行取消操作。", "确认", "取消"))
-            {
-                is_editing_custom_setting_list = false;
-            }
-        }
-        if (GEditorGUI.Button("保存", 60, 20))
-        {
-            if (is_editing_custom_setting_list)
-            {
-                /*
-                ChangeCustomConfig();
-                SaveLocalizationCustomSetting();
-                */
-                string path = EditorUtility.SaveFilePanel("保存新的配置到", Configs.Instance.Editor_EditorConfigFolderPath, "New Config", "xml");
-                if (!path.Equals(""))
-                {
-                    string configFileName = Path.GetFileNameWithoutExtension(path);
-                    SaveLocalizationCustomSetting(path);
-                    is_editing_custom_setting_list = !is_editing_custom_setting_list;
-                }
-
-            }
-            else
-            {
-                UpdateLanguageIndex();
-            }
-        }
-        GUILayout.EndHorizontal();
-        EditorGUI.EndDisabledGroup();
-
-
-        if (EditorGUI.EndChangeCheck())
-        {
-            _this.ApplyModifiedProperties();
-            ui_game_object_name_list.Clear();
-            foreach (var obj in ui_gameobject_list)
-                ui_game_object_name_list.Add(obj.name);
-        }
-    }
-
-
-    #endregion
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    [SerializeField] private List<string> ui_game_object_name_list = new List<string>();
-    [SerializeField] private Dictionary<int, GameObject> ui_language_elem_dic = new Dictionary<int, GameObject>();
-    private int ui_gameobject_selected = 0;
-    private int gird_width = 0;
-
-
-    private LocalizationLanguageEditorConfig editor_setting = new LocalizationLanguageEditorConfig();
-
-    private List<List<string>> ui_table_data = new List<List<string>>();
-    private ExcelData ui_excel_data = new ExcelData();
-    private Dictionary<string, int> language_index = new Dictionary<string, int>();
-
-    private HelpInfo ui_localization_editor_info = new HelpInfo();
-
-    
-    
-
     private void OnGUI()
     {
         scrollPos = GUILayout.BeginScrollView(scrollPos);
-        gird_width = ((int)position.width-10) / (ui_language_list.Count + 1)-5;
+        gird_width = ((int)position.width - 10) / (ui_language_list.Count + 1) - 5;
 
-        LocalizationCustomSettingGUI();
+        LocalizationCustomSettingMainGUI();
 
 
         EditorGUILayout.Space(20);
@@ -241,7 +54,7 @@ public class LanguageLocalizationWindow : EditorWindow
         EditorGUILayout.LabelField("本地化数据表格编辑器", EditorGUIStyles.Instance.TitleStyle, new[] { GUILayout.Height(30) });
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField(" ", EditorGUIStyles.Instance.GirdTextBoldStyle, new[] {GUILayout.Width(10) });
+        EditorGUILayout.LabelField(" ", EditorGUIStyles.Instance.GirdTextBoldStyle, new[] { GUILayout.Width(10) });
         ui_gameobject_selected = EditorGUILayout.Popup(new GUIContent("UI对象"), ui_gameobject_selected, ui_game_object_name_list.ToArray());
         EditorGUILayout.EndHorizontal();
         if (EditorGUI.EndChangeCheck())
@@ -251,7 +64,7 @@ public class LanguageLocalizationWindow : EditorWindow
         }
 
         EditorGUI.BeginChangeCheck();
-        if(!ui_localization_editor_info.Show())
+        if (!ui_localization_editor_info.Show())
         {
             EditorGUILayout.Space(10);
             for (int i = 0; i < ui_table_data.Count; i++)
@@ -311,6 +124,318 @@ public class LanguageLocalizationWindow : EditorWindow
         }
         GUILayout.EndScrollView();
     }
+    private void OnDisable()
+    {
+        //SaveLocalizationCustomSetting();
+    }
+    //===========================================================================
+
+
+    #region 本地化常规设置部分
+    private SerializedProperty ui_gameobject_list_property;
+    private SerializedProperty ui_language_list_property;
+
+    [SerializeField] private List<GameObject> ui_gameobject_list = new List<GameObject>();
+    [SerializeField] private List<string> ui_language_list = new List<string>();
+
+    private List<string> config_file_list = new List<string>();
+    private List<string> config_file_names_without_extension = new List<string>();
+    private int config_file_select = 0;
+    private HelpInfo no_have_configs_info = new HelpInfo(true, "当前无配置文件", MessageType.Info);
+
+    private bool is_editing_custom_setting_list = false;     //是否正在编辑本地常规化设置
+    private bool doing_manage_config_file = false;           //是否管理配置文件
+
+    /// <summary>
+    /// 加载关于本地化常规设置配置
+    /// </summary>
+    private void LoadLocalizationCustomSetting()
+    {
+        config_file_list.Clear();
+        config_file_list.Add("None");
+        string[] filePaths = Directory.GetFiles(Configs.Instance.Editor_EditorConfigFolderPath, "*.config");
+        config_file_list.AddRange(filePaths.ToList());
+        if (!Directory.Exists(Configs.Instance.Editor_EditorConfigFolderPath))
+        {
+            Directory.CreateDirectory(Configs.Instance.Editor_EditorConfigFolderPath);
+            return;
+        }
+
+        if (File.Exists(Configs.Instance.Editor_LanguageLocalizationConfigFilePath))
+        {
+            LocalizationLanguageEditorConfig lle_config = XmlUtil.DeserializeFromFile<LocalizationLanguageEditorConfig>(Configs.Instance.Editor_LanguageLocalizationConfigFilePath);
+            if (lle_config != default)
+            {
+                ui_gameobject_list.Clear();
+                if (lle_config.gameObjectPathsInProject != null)
+                {
+                    foreach (var path in lle_config.gameObjectPathsInProject)
+                        ui_gameobject_list.Add(AssetDatabase.LoadAssetAtPath<GameObject>(path));
+                }
+
+                if (lle_config.languageList != null)
+                {
+                    ui_language_list.Clear();
+                    foreach (var l in lle_config.languageList)
+                        ui_language_list.Add(l);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 保存关于本地化常规设置配置
+    /// </summary>
+    private void SaveLocalizationCustomSetting(string path)
+    {
+        LocalizationLanguageEditorConfig lle_config = new LocalizationLanguageEditorConfig();
+        foreach (var o in ui_gameobject_list)
+            lle_config.gameObjectPathsInProject.Add(AssetDatabase.GetAssetPath(o));
+        lle_config.languageList = ui_language_list;
+        lle_config.UpdateLanguageIndexDic();
+        XmlUtil.Serialize(lle_config, path);
+
+        if (File.Exists(path))
+        {
+            LanguageLocalizationConfigsManager.Instance.AddPath(path);
+            LanguageLocalizationConfigsManager.Instance.SaveToLocalFile();
+        }
+
+    }
+
+    private void LocalizationCustomSettingInitialization()
+    {
+        LanguageLocalizationConfigsManager llm = LanguageLocalizationConfigsManager.Instance;
+        config_file_list.Clear();
+        config_file_names_without_extension.Clear();
+        config_file_list.Add(llm.None);
+        llm.CleanNotExistsFileRecord();
+        config_file_list.AddRange(llm.GetPaths().ToArray());
+        foreach (var p in config_file_list)
+            config_file_names_without_extension.Add(Path.GetFileName(p));
+
+        config_file_select = llm.GetSelectedConfigFileIndex() + 1;
+
+        if(config_file_select==0)
+        {
+            ui_gameobject_list.Clear();
+            ui_language_list.Clear();
+        }
+        else
+        {
+            RefreshConfigEditor(llm.GetSelectedName());
+        }
+        _this.Update();
+    }
+
+    private bool RefreshConfigEditor(string configPath)
+    {
+        if (File.Exists(configPath))
+        {
+            LocalizationLanguageEditorConfig config = XmlUtil.DeserializeFromFile<LocalizationLanguageEditorConfig>(configPath);
+            if (config != default)
+            {
+                ui_gameobject_list.Clear();
+                if (config.gameObjectPathsInProject != null)
+                {
+                    foreach (var p in config.gameObjectPathsInProject)
+                        ui_gameobject_list.Add(AssetDatabase.LoadAssetAtPath<GameObject>(p));
+                }
+
+                if (config.languageList != null)
+                {
+                    ui_language_list.Clear();
+                    foreach (var l in config.languageList)
+                        ui_language_list.Add(l);
+                }
+            }
+            else
+                return false;
+            return true;
+        }
+        return false;
+        
+    }
+
+    /// <summary>
+    /// 本地化常规设置GUI渲染函数
+    /// </summary>
+    private void LocalizationCustomSettingMainGUI()
+    {
+        GEditorGUI.Title("本地化常规设置");
+        EditorGUILayout.BeginHorizontal();
+        EditorGUI.BeginChangeCheck();
+        config_file_select = EditorGUILayout.Popup(new GUIContent("当前配置"), config_file_select, config_file_names_without_extension.ToArray(), new[] { GUILayout.Width(560), GUILayout.Height(20) });
+        if(EditorGUI.EndChangeCheck())
+        {
+            LanguageLocalizationConfigsManager.Instance.ChangeSelectedPath(config_file_list[config_file_select]);
+            LocalizationCustomSettingInitialization();
+        }
+        EditorGUI.BeginDisabledGroup(is_editing_custom_setting_list);
+        if (GEditorGUI.Button("新建", 60, 20))
+        {
+            is_editing_custom_setting_list = true;
+        }
+        if (GEditorGUI.Button("配置文件列表", 90, 20))
+        {
+            if (!doing_manage_config_file)
+                doing_manage_config_file = true;
+        }
+        EditorGUI.EndDisabledGroup();
+        EditorGUILayout.EndHorizontal();
+
+        EditorGUILayout.BeginHorizontal();
+        GEditorGUI.Label("绝对路径", 150);
+        EditorGUILayout.LabelField(config_file_list[config_file_select]);
+        EditorGUILayout.EndHorizontal();
+        ConfigFilesManagerGUI(doing_manage_config_file);
+        EditorConfigFileContentGUI();
+    }
+
+    private void ConfigFilesManagerGUI(bool show)
+    {
+        if (show)
+        {
+            if (!LanguageLocalizationConfigsManager.Instance.IsHavePaths()&&LanguageLocalizationConfigsManager.Instance.IsDeleteRecordEmpty())
+            {
+                no_have_configs_info.Show();
+                if (GEditorGUI.Button("退出管理", 60, 20))
+                {
+                    doing_manage_config_file = false;
+                }
+            }
+            else
+            {
+                EditorGUILayout.Space(10);
+                EditorGUILayout.LabelField("[子窗口管理]");
+                List<string> paths = LanguageLocalizationConfigsManager.Instance.GetPaths();
+                for (int index = 0; index < paths.Count; index++)
+                {
+                    EditorGUILayout.BeginHorizontal();
+                    GEditorGUI.Label($"{Path.GetFileName(paths[index])}", 150);
+                    EditorGUILayout.TextField(paths[index], new[] { GUILayout.Width(408) });
+                    if (GEditorGUI.Button("移除", 60, 20))
+                    {
+                        LanguageLocalizationConfigsManager.Instance.RemovePath(paths[index]);
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+
+                if(!LanguageLocalizationConfigsManager.Instance.IsHavePaths())
+                    no_have_configs_info.Show();
+
+                EditorGUILayout.BeginHorizontal();
+                if(LanguageLocalizationConfigsManager.Instance.IsDeleteRecordEmpty())
+                {
+                    if (GEditorGUI.Button("退出管理", 60, 20))
+                    {
+                        doing_manage_config_file = false;
+                    }
+                }
+                else
+                {
+                    if (GEditorGUI.Button("取消修改", 60, 20))
+                    {
+                        if (EditorUtility.DisplayDialog("警告", "取消后当前修改将不会保存。\n是否执行取消操作。", "确认[Enter]", "取消[Esc]"))
+                        {
+                            LanguageLocalizationConfigsManager.Instance.CleanDeleteRecord();
+                            doing_manage_config_file = false;
+                            LocalizationCustomSettingInitialization();
+                        }
+                    }
+
+                    if (GEditorGUI.Button("保存修改", 60, 20))
+                    {
+                        if (EditorUtility.DisplayDialog("警告", "确定修改后将不可撤销。\n是否执行撤销操作。", "确认[Enter]", "取消[Esc]"))
+                        {
+                            LanguageLocalizationConfigsManager.Instance.SaveToLocalFile();
+                            doing_manage_config_file = false;
+                            LocalizationCustomSettingInitialization();
+                        }
+                    }
+                }
+                EditorGUILayout.EndHorizontal();
+            }
+
+
+            EditorGUILayout.Space(20);
+        }
+
+    }
+
+    private void EditorConfigFileContentGUI()
+    {
+        EditorGUI.BeginChangeCheck();
+        EditorGUI.BeginDisabledGroup(!is_editing_custom_setting_list);
+        EditorGUILayout.PropertyField(ui_gameobject_list_property, new GUIContent("UI预制体列表"), true);
+        EditorGUILayout.PropertyField(ui_language_list_property, new GUIContent("语言列表"), true);
+
+        EditorGUILayout.Space(15);
+        GUILayout.BeginHorizontal();
+        GUILayout.FlexibleSpace();
+        if (GEditorGUI.Button("取消", 60, 20))
+        {
+            if (EditorUtility.DisplayDialog("警告", "取消后当前的配置信息将不会保存。\n是否执行取消操作。", "确认[Enter]", "取消[Esc]"))
+            {
+                is_editing_custom_setting_list = false;
+            }
+        }
+        if (GEditorGUI.Button("保存", 60, 20))
+        {
+            if (is_editing_custom_setting_list)
+            {
+                /*
+                ChangeCustomConfig();
+                SaveLocalizationCustomSetting();
+                */
+                string path = EditorUtility.SaveFilePanel("保存新的配置到", Configs.Instance.Editor_EditorConfigFolderPath, "New Config", "config");
+                if (!path.Equals(""))
+                {
+                    string configFileName = Path.GetFileNameWithoutExtension(path);
+                    SaveLocalizationCustomSetting(path);
+                    is_editing_custom_setting_list = !is_editing_custom_setting_list;
+                }
+                LocalizationCustomSettingInitialization();
+            }
+            else
+            {
+                UpdateLanguageIndex();
+            }
+        }
+        GUILayout.EndHorizontal();
+        EditorGUI.EndDisabledGroup();
+
+
+        if (EditorGUI.EndChangeCheck())
+        {
+            _this.ApplyModifiedProperties();
+            ui_game_object_name_list.Clear();
+            foreach (var obj in ui_gameobject_list)
+                ui_game_object_name_list.Add(obj.name);
+        }
+    }
+    #endregion
+
+    #region 本地化数据表格编辑器
+
+    [SerializeField] private List<string> ui_game_object_name_list = new List<string>();
+    [SerializeField] private Dictionary<int, GameObject> ui_language_elem_dic = new Dictionary<int, GameObject>();
+    private int ui_gameobject_selected = 0;
+    private int gird_width = 0;
+
+
+    private LocalizationLanguageEditorConfig editor_setting = new LocalizationLanguageEditorConfig();
+
+    private List<List<string>> ui_table_data = new List<List<string>>();
+    private ExcelData ui_excel_data = new ExcelData();
+    private Dictionary<string, int> language_index = new Dictionary<string, int>();
+
+    private HelpInfo ui_localization_editor_info = new HelpInfo();
+
+
+
+
+
 
 
     /// <summary>
@@ -330,7 +455,7 @@ public class LanguageLocalizationWindow : EditorWindow
     {
         ExcelData newData = new ExcelData();
 
-        foreach (var obj in ui_gameobject_list) 
+        foreach (var obj in ui_gameobject_list)
         {
             List<List<string>> data = new List<List<string>>();
             data.Add(new List<string> { "KEY" });
@@ -345,9 +470,9 @@ public class LanguageLocalizationWindow : EditorWindow
                     List<string> row = new List<string>();
                     row.Add(l.key);
                     var query = (from r in tb
-                                where r[0] == l.key
-                                select r).ToList();
-                    if(query.Count>=1)
+                                 where r[0] == l.key
+                                 select r).ToList();
+                    if (query.Count >= 1)
                     {
                         //需要原来xlsx文件上记录的东西拷贝到新的Data上
                         foreach (var language in ui_language_list)
@@ -419,6 +544,6 @@ public class LanguageLocalizationWindow : EditorWindow
         else
             ui_localization_editor_info.SetState(true, $"[当前选择的GameObject为空]", MessageType.Warning);
     }
-
+    #endregion
 
 }

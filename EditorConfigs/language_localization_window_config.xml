@@ -1,13 +1,8 @@
 <?xml version="1.0"?>
-<LocalizationLanguageEditorConfig xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <gameObjectPathsInProject>
-    <string>Assets/TestFiles/Prefabs/@gaming_page.prefab</string>
-    <string>Assets/TestFiles/Prefabs/@input_modify_page.prefab</string>
-    <string>Assets/TestFiles/Prefabs/@other_page.prefab</string>
-    <string>Assets/TestFiles/Prefabs/@ui_comp_page.prefab</string>
-  </gameObjectPathsInProject>
-  <languageList>
-    <string>Chinese</string>
-    <string>English</string>
-  </languageList>
-</LocalizationLanguageEditorConfig>
+<ConfigFilePaths xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <selectedPaths>E:/ZhuSenlin Project/[0]Game Dev Projects/UnityGameFrameworkDemo/EditorConfigs/02.config</selectedPaths>
+  <paths>
+    <string>E:/ZhuSenlin Project/[0]Game Dev Projects/UnityGameFrameworkDemo/EditorConfigs/01.config</string>
+    <string>E:/ZhuSenlin Project/[0]Game Dev Projects/UnityGameFrameworkDemo/EditorConfigs/02.config</string>
+  </paths>
+</ConfigFilePaths>

@@ -73,6 +73,16 @@ public class HelpInfo
     private string msg = "";
     private MessageType msgType;
 
+    public HelpInfo()
+    {
+        SetState(false);
+    }
+
+    public HelpInfo(bool _show, string _msg, MessageType _type)
+    {
+        SetState(_show, _msg, _type);
+    }
+
     public void SetState(bool _show,string _msg="",MessageType _type= MessageType.None)
     {
         isShow = _show;

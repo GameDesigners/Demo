@@ -32,7 +32,7 @@ public class LanguageLocalizationWindow : EditorWindow
         LocalizationCustomSettingInitialization();
         //UpdateLanguageIndex();
         //ChangeCustomConfig();
-        ChangeGameObject();
+        UpdateLocalizationDataTableEditorWindowInitialization();
 
         Debug.Log("Call OnEnable()");
     }
@@ -75,7 +75,9 @@ public class LanguageLocalizationWindow : EditorWindow
             lle_config.gameObjectPathsInProject.Add(AssetDatabase.GetAssetPath(o));
         lle_config.languageList = ui_language_list;
         lle_config.UpdateLanguageIndexDic();
-        lle_config.languageLocalizationExcelFilePath = CreateExcelTemplateFileForConfig(Path.GetFileNameWithoutExtension(path), lle_config);
+        lle_config.languageLocalizationExcelFilePath = LanguageLocalizationConfigsManager.Instance.GetRelativePath(CreateExcelTemplateFileForConfig(path, lle_config));
+        if (File.Exists(path))
+            File.Delete(path);
         XmlUtil.Serialize(lle_config, path);
 
         if (File.Exists(path))
@@ -123,7 +125,11 @@ public class LanguageLocalizationWindow : EditorWindow
         if (File.Exists(configPath))
         {
             LocalizationLanguageEditorConfig config = XmlUtil.DeserializeFromFile<LocalizationLanguageEditorConfig>(configPath);
-            CreateExcelTemplateFileForConfig(Path.GetFileNameWithoutExtension(configPath), config);
+            config.languageLocalizationExcelFilePath = LanguageLocalizationConfigsManager.Instance.GetRelativePath(CreateExcelTemplateFileForConfig(configPath, config));
+            if (File.Exists(configPath))
+                File.Delete(configPath);
+            XmlUtil.Serialize(config, configPath);
+
             if (config != default)
             {
                 ui_gameobject_list.Clear();
@@ -152,13 +158,13 @@ public class LanguageLocalizationWindow : EditorWindow
     /// </summary>
     /// <param name="configFileName">配置文件的名称</param>
     /// <returns></returns>
-    private string CreateExcelTemplateFileForConfig(string configFileName,LocalizationLanguageEditorConfig llec)
+    private string CreateExcelTemplateFileForConfig(string configFilePath,LocalizationLanguageEditorConfig llec)
     {
         if (!Directory.Exists(Configs.Instance.LanguageLocalizationFolderPath))
             Directory.CreateDirectory(Configs.Instance.LanguageLocalizationFolderPath);
 
         ExcelData data = new ExcelData();
-        string path = $"{Configs.Instance.LanguageLocalizationFolderPath}[{configFileName}]language_localization_excel.xlsx";
+        string path = $"{Configs.Instance.LanguageLocalizationFolderPath}[ProjectRoot%{LanguageLocalizationConfigsManager.Instance.GetRelativePath(configFilePath).Replace("/","%").Replace(":","-")}]language_localization_excel.xlsx";
         if(!File.Exists(path)&& llec!=null)
         {
             foreach (var s in llec.gameObjectPathsInProject)
@@ -190,7 +196,8 @@ public class LanguageLocalizationWindow : EditorWindow
 
                 if (llec.languageLocalizationExcelFilePath == null)
                 {
-                    llec.languageLocalizationExcelFilePath = path;
+                    llec.languageLocalizationExcelFilePath = LanguageLocalizationConfigsManager.Instance.GetRelativePath(path);
+                    Debug.Log($"GetRelativePath:{llec.languageLocalizationExcelFilePath}");
                     XmlUtil.Serialize(llec, LanguageLocalizationConfigsManager.Instance.GetSelectedPath());
                 }
             }
@@ -213,6 +220,7 @@ public class LanguageLocalizationWindow : EditorWindow
         {
             LanguageLocalizationConfigsManager.Instance.ChangeSelectedPath(config_file_list[config_file_select]);
             LocalizationCustomSettingInitialization();
+            RefreshLocalizationLanguageDataTable();
         }
         EditorGUI.BeginDisabledGroup(is_editing_custom_setting_list);
         if (GEditorGUI.Button("新建", 60, 20))
@@ -250,7 +258,9 @@ public class LanguageLocalizationWindow : EditorWindow
                 if (GEditorGUI.Button("手动添加", 60, 20))
                 {
                     string path = EditorUtility.OpenFilePanel("选择您添加的配置文件", Configs.Instance.Editor_EditorConfigFolderPath, "config");
-                    if (path != "")
+                    if(!LanguageLocalizationConfigsManager.Instance.IsInProjectFolder(path))
+                        GDebug.Instance.Error($"所选文件的路径:{path}不在项目文件夹中。");
+                    else if (path != "")
                     {
                         var parseResult = XmlUtil.DeserializeFromFile<LocalizationLanguageEditorConfig>(path);
                         if (parseResult == default)
@@ -292,7 +302,9 @@ public class LanguageLocalizationWindow : EditorWindow
                 if (GEditorGUI.Button("手动添加", 60, 20))
                 {
                     string path = EditorUtility.OpenFilePanel("选择您添加的配置文件", Configs.Instance.Editor_EditorConfigFolderPath, "config");
-                    if (path != "")
+                    if (!LanguageLocalizationConfigsManager.Instance.IsInProjectFolder(path))
+                        GDebug.Instance.Error($"所选文件的路径:{path}不在项目文件夹中。");
+                    else if (path != "")
                     {
                         var parseResult = XmlUtil.DeserializeFromFile<LocalizationLanguageEditorConfig>(path);
                         if (parseResult == default)
@@ -369,7 +381,9 @@ public class LanguageLocalizationWindow : EditorWindow
                 SaveLocalizationCustomSetting();
                 */
                 string path = EditorUtility.SaveFilePanel("保存新的配置到", Configs.Instance.Editor_EditorConfigFolderPath, "New Config", "config");
-                if (!path.Equals(""))
+                if (!LanguageLocalizationConfigsManager.Instance.IsInProjectFolder(path))
+                    GDebug.Instance.Error($"所选文件的路径:{path}不在项目文件夹中。");
+                else if (path != "")
                 {
                     SaveLocalizationCustomSetting(path);
                     is_editing_custom_setting_list = !is_editing_custom_setting_list;
@@ -388,9 +402,6 @@ public class LanguageLocalizationWindow : EditorWindow
         if (EditorGUI.EndChangeCheck())
         {
             _this.ApplyModifiedProperties();
-            ui_game_object_name_list.Clear();
-            foreach (var obj in ui_gameobject_list)
-                ui_game_object_name_list.Add(obj.name);
         }
     }
     #endregion
@@ -411,83 +422,14 @@ public class LanguageLocalizationWindow : EditorWindow
 
     private HelpInfo ui_localization_editor_info = new HelpInfo();
 
-    private void LocalizationDataTableEditorGUI()
+
+    private void UpdateLocalizationDataTableEditorWindowInitialization()
     {
-        gird_width = ((int)position.width) / (ui_language_list.Count + 2) - 5;
+        ui_game_object_name_list.Clear();
+        foreach (var obj in ui_gameobject_list)
+            ui_game_object_name_list.Add(obj.name);
 
-        GEditorGUI.Title("本地化数据表格编辑器", height: 30);
-
-
-        EditorGUI.BeginChangeCheck();
-        ui_gameobject_selected = EditorGUILayout.Popup(new GUIContent("UI对象"), ui_gameobject_selected, ui_game_object_name_list.ToArray(), new[] { GUILayout.Width(720), GUILayout.Height(20) });
-        if (EditorGUI.EndChangeCheck())
-        {
-            ChangeGameObject();
-            _this.ApplyModifiedProperties();
-        }
-
-        EditorGUI.BeginChangeCheck();
-        if (!ui_localization_editor_info.Show())
-        {
-            EditorGUILayout.Space(10);
-            for (int i = 0; i < excel_sheet.Count; i++)
-            {
-                EditorGUILayout.BeginHorizontal();
-                if (i == 0)
-                {
-                    EditorGUILayout.LabelField("GameObject", EditorGUIStyles.Instance.GirdTextBoldStyle, new[] { GUILayout.Height(15), GUILayout.Width(gird_width) });
-                    for (int j = 0; j < excel_sheet[i].Count; j++)
-                        EditorGUILayout.LabelField(excel_sheet[i][j], EditorGUIStyles.Instance.GirdTextBoldStyle, new[] { GUILayout.Height(15), GUILayout.Width(gird_width) });
-                }
-                else
-                {
-                    GameObject go = null;
-                    if (rowDic.ContainsKey(excel_sheet[i][0]))
-                        go = rowDic[excel_sheet[i][0]].comp.gameObject;
-                    EditorGUILayout.ObjectField(go, typeof(GameObject),true, new[] { GUILayout.Height(40), GUILayout.Width(gird_width) });
-                    for (int j = 0; j < excel_sheet[i].Count; j++)
-                        excel_sheet[i][j] = EditorGUILayout.TextArea(excel_sheet[i][j], new[] { GUILayout.Height(40), GUILayout.Width(gird_width) });
-
-                }
-
-                EditorGUILayout.EndHorizontal();
-            }
-
-            EditorGUILayout.Space(20);
-            GUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-            if (GUILayout.Button("保存修改", new[] { GUILayout.Width(60), GUILayout.Height(20) }))
-            {
-                if (EditorUtility.DisplayDialog("警告", "此操作将会写入持久化数据\n请确认是否保存修改。", "确认", "取消"))
-                {
-                    //ExcelUtil.Write(Application.streamingAssetsPath + "/language_localization.xlsx", excel_sheet, ui_game_object_name_list[ui_gameobject_selected]);
-                    string name = ui_game_object_name_list[ui_gameobject_selected];
-                    if (ui_excel_data.ContainsKey(name))
-                        ui_excel_data[name] = excel_sheet;
-                    ExcelUtil.Write(Application.streamingAssetsPath + "/language_localization.xlsx", ui_excel_data);
-
-
-                    foreach (var e in ui_language_elem_dic)
-                    {
-                        if (e.Key < excel_sheet.Count)
-                        {
-                            GUILocalization l = e.Value.GetComponent<GUILocalization>();
-                            if (l != null)
-                                l.key = excel_sheet[e.Key][0];
-                            EditorUtility.SetDirty(e.Value);
-                        }
-                    }
-                    AssetDatabase.Refresh();
-                }
-                else
-                    Debug.Log("取消修改");
-            }
-            GUILayout.EndHorizontal();
-        }
-        if (EditorGUI.EndChangeCheck())
-        {
-            _this.ApplyModifiedProperties();
-        }
+        RefreshLocalizationLanguageDataTable();
     }
 
     /// <summary>
@@ -546,45 +488,58 @@ public class LanguageLocalizationWindow : EditorWindow
         language_index.Clear();
         for (int index = 0; index < ui_language_list.Count; index++)
             language_index.Add(ui_language_list[index], index);
+
+        RefreshLocalizationLanguageDataTable();
     }
 
-    private void ChangeGameObject()
+    /// <summary>
+    /// 刷新表格编辑器
+    /// </summary>
+    private void RefreshLocalizationLanguageDataTable()
     {
         ui_language_elem_dic.Clear();
 
         rowDic.Clear();
         excel_sheet.Clear();
-        
+
         //获取当前编辑的物体
         GameObject ui_gameobject = null;
         if (ui_gameobject_list.Count > ui_gameobject_selected)
             ui_gameobject = ui_gameobject_list[ui_gameobject_selected];
 
+        int languageCount = 0; 
 
         var llce = XmlUtil.DeserializeFromFile<LocalizationLanguageEditorConfig>(LanguageLocalizationConfigsManager.Instance.GetSelectedPath());
+        //Debug.Log($"现在加载的CONFIGS是：{LanguageLocalizationConfigsManager.Instance.GetSelectedPath()}");
         //读取Excel数据
+        ui_excel_data = default;
         if (llce != default && ui_gameobject != null)
         {
-            ExcelData excelData = ExcelUtil.Read(llce.languageLocalizationExcelFilePath);
-            if (excelData != default)
+            //Debug.Log($"现在加载的EXCELS是：{LanguageLocalizationConfigsManager.Instance.GetFullFilePathBaseOnProjectRootPath(llce.languageLocalizationExcelFilePath)}");
+            ui_excel_data = ExcelUtil.Read(LanguageLocalizationConfigsManager.Instance.GetFullFilePathBaseOnProjectRootPath(llce.languageLocalizationExcelFilePath));
+            if (ui_excel_data != default)
             {
                 string sheetName = ui_gameobject.name;
                 List<List<string>> sheetData = null;
-                if (excelData.ContainsKey(sheetName))
+                if (ui_excel_data.ContainsKey(sheetName))
                 {
-                    sheetData = excelData[sheetName];
+                    sheetData = ui_excel_data[sheetName];
+                    if (sheetData.Count > 0)
+                        languageCount = sheetData[0].Count - 1;
                     foreach (var sd in sheetData)
+                    {
                         rowDic.Add(sd[0], new EditorExcelRowData(null, sd));
+                    }
                 }
             }
         }
-
 
         //更新表头
         List<string> title_list = new List<string> { "KEY" };
         title_list.AddRange(ui_language_list);
         excel_sheet.Add(title_list);
 
+        List<EditorExcelRowData> newData = new List<EditorExcelRowData>();
         //更新数据至表格编辑器
         if (ui_gameobject != null)
         {
@@ -594,7 +549,7 @@ public class LanguageLocalizationWindow : EditorWindow
                 if (locals.Length != 0)
                 {
                     ui_localization_editor_info.SetState(false);
-                    for (int i=0;i<locals.Length;i++)
+                    for (int i = 0; i < locals.Length; i++)
                     {
                         ui_language_elem_dic.Add(excel_sheet.Count, locals[i].gameObject);
 
@@ -603,25 +558,148 @@ public class LanguageLocalizationWindow : EditorWindow
                         {
                             rowDic[locals[i].key].comp = locals[i];
                             row = rowDic[locals[i].key].row_data;
+                            excel_sheet.Add(row);
                         }
                         else
-                        {
-                            row.Add("");
-                            for (int j = 0; j < ui_language_list.Count; j++)
-                                row.Add("");
-                        }
-                        excel_sheet.Add(row);
+                            newData.Add(new EditorExcelRowData(locals[i], null));
                     }
                     _this.Update();
                 }
                 else
                     ui_localization_editor_info.SetState(true, $"[{ui_gameobject.name}]未找到LanguageElem组件", MessageType.Warning);
+
+                //添加表格中未存在的数据
+                if(newData.Count>0)
+                {
+                    for (int i = 0; i < newData.Count; i++)
+                    {
+                        List<string> newRow = new List<string>();
+                        newRow.Add($"{newData[i].comp.gameObject.name}[{rowDic.Count + i - 1}]");
+                        for (int j = 0; j < languageCount; j++)
+                            newRow.Add("");
+                        excel_sheet.Add(newRow);
+                        newData[i].row_data = newRow;
+                        if(rowDic.ContainsKey(newRow[0]))
+                        {
+                            rowDic[newRow[0]] = newData[i];
+                        }
+                        else
+                        {
+                            rowDic.Add(newRow[0], newData[i]);
+                        }
+                    }
+
+                    //将新增的数据添加到Excel表格中
+                    if (ui_excel_data == default)  //本地文件为空
+                    {
+                        ui_excel_data = new ExcelData();
+                        ui_excel_data.Add(ui_gameobject.name, excel_sheet);
+                    }
+                    else
+                        ui_excel_data[ui_gameobject.name] = excel_sheet;
+
+                    ExcelUtil.Write(LanguageLocalizationConfigsManager.Instance.GetFullFilePathBaseOnProjectRootPath(llce.languageLocalizationExcelFilePath), ui_excel_data);
+                }
             }
             else
                 ui_localization_editor_info.SetState(true, $"[{ui_gameobject.name}]未找到LanguageElem组件", MessageType.Warning);
         }
         else
             ui_localization_editor_info.SetState(true, $"[当前选择的GameObject为空]", MessageType.Warning);
+    }
+
+
+    /// <summary>
+    /// 表格编辑器GUI
+    /// </summary>
+    private void LocalizationDataTableEditorGUI()
+    {
+        gird_width = ((int)position.width-40) / (ui_language_list.Count + 2) - 5;
+
+        GEditorGUI.Title("本地化数据表格编辑器", height: 30);
+
+
+        EditorGUI.BeginChangeCheck();
+        ui_gameobject_selected = EditorGUILayout.Popup(new GUIContent("UI对象"), ui_gameobject_selected, ui_game_object_name_list.ToArray(), new[] { GUILayout.Width(720), GUILayout.Height(20) });
+        if (EditorGUI.EndChangeCheck())
+        {
+            RefreshLocalizationLanguageDataTable();
+            _this.ApplyModifiedProperties();
+        }
+
+        EditorGUI.BeginChangeCheck();
+        if (!ui_localization_editor_info.Show())
+        {
+            //if (excel_sheet.Count != 0)
+            //    if (excel_sheet[0].Count != 0)
+            //        Debug.Log($"cols:{excel_sheet.Count},row:{excel_sheet[0].Count}");
+            EditorGUILayout.Space(10);
+            for (int i = 0; i < excel_sheet.Count; i++)
+            {
+                EditorGUILayout.BeginHorizontal();
+                if (i == 0)
+                {
+                    EditorGUILayout.LabelField("ID", EditorGUIStyles.Instance.GirdTexMidAligntBoldStyle, new[] { GUILayout.Height(15), GUILayout.Width(40) });
+                    EditorGUILayout.LabelField("GameObject", EditorGUIStyles.Instance.GirdTextBoldStyle, new[] { GUILayout.Height(15), GUILayout.Width(gird_width) });
+                    for (int j = 0; j < excel_sheet[i].Count; j++)
+                        EditorGUILayout.LabelField(excel_sheet[i][j], EditorGUIStyles.Instance.GirdTextBoldStyle, new[] { GUILayout.Height(15), GUILayout.Width(gird_width) });
+                }
+                else
+                {
+                    GameObject go = null;
+                    if (rowDic.ContainsKey(excel_sheet[i][0]))
+                    {
+                        if (rowDic[excel_sheet[i][0]].comp != null)
+                            go = rowDic[excel_sheet[i][0]].comp.gameObject;
+                        else
+                        {
+                            RefreshLocalizationLanguageDataTable();
+                            return;
+                        }
+                    }
+                    EditorGUILayout.LabelField("[100]", EditorGUIStyles.Instance.GirdTexMidAligntBoldStyle, new[] { GUILayout.Height(40), GUILayout.Width(40) });
+                    EditorGUILayout.ObjectField(go, typeof(GameObject),true, new[] { GUILayout.Height(40), GUILayout.Width(gird_width) });
+                    for (int j = 0; j < excel_sheet[i].Count; j++)
+                        excel_sheet[i][j] = EditorGUILayout.TextArea(excel_sheet[i][j], new[] { GUILayout.Height(40), GUILayout.Width(gird_width) });
+
+                }
+
+                EditorGUILayout.EndHorizontal();
+            }
+
+            EditorGUILayout.Space(20);
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            if(GEditorGUI.Button("刷新",60,20))
+            {
+                RefreshLocalizationLanguageDataTable();
+            }
+            if (GEditorGUI.Button("保存修改", 60,20))
+            {
+                if (EditorUtility.DisplayDialog("警告", "此操作将会写入持久化数据\n请确认是否保存修改。", "确认", "取消"))
+                {
+                    //ExcelUtil.Write(Application.streamingAssetsPath + "/language_localization.xlsx", excel_sheet, ui_game_object_name_list[ui_gameobject_selected]);
+                    string name = ui_game_object_name_list[ui_gameobject_selected];
+                    if (ui_excel_data.ContainsKey(name))
+                        ui_excel_data[name] = excel_sheet;
+                    var llce = XmlUtil.DeserializeFromFile<LocalizationLanguageEditorConfig>(LanguageLocalizationConfigsManager.Instance.GetSelectedPath());
+                    if (llce != default)
+                        ExcelUtil.Write(LanguageLocalizationConfigsManager.Instance.GetFullFilePathBaseOnProjectRootPath(llce.languageLocalizationExcelFilePath), ui_excel_data);
+
+
+                    foreach(var r in rowDic)
+                        EditorUtility.SetDirty(r.Value.comp.gameObject);
+                    AssetDatabase.SaveAssets();
+                }
+                else
+                    Debug.Log("取消修改");
+            }
+            GUILayout.EndHorizontal();
+        }
+        if (EditorGUI.EndChangeCheck())
+        {
+            _this.ApplyModifiedProperties();
+        }
     }
     #endregion
 

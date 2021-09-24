@@ -94,6 +94,7 @@ public class ExcelUtil
                     else
                         GDebug.Instance.Error($"当前获取的WorkSheet为空...");
                 }
+                fs.Close();
                 return ed;
             }
         }

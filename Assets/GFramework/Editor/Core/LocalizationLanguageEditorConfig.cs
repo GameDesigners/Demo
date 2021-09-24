@@ -81,25 +81,6 @@ public class LanguageLocalizationConfigsManager
             return _instance;
         }
     }
-
-    public List<string> GetPaths() => configFilePaths.paths;
-    public bool IsHavePaths() => configFilePaths.paths.Count != 0;
-    public bool IsDeleteRecordEmpty() => deleteRecord.Count == 0;
-    public string GetSelectedPath() => configFilePaths.selectedPaths;
-
-    public int GetSelectedConfigFileIndex() => ConfigFileIndex(configFilePaths.selectedPaths);
-    public int ConfigFileIndex(string selectFilePath)
-    {
-        for(int index=0;index<configFilePaths.paths.Count;index++)
-        {
-            if (selectFilePath == configFilePaths.paths[index])
-                return index;
-        }
-        return -1;
-    }
-
-    public string GetFullFilePathBaseOnProjectRootPath(string relativePath) => projectRootPath + relativePath;
-
     public LanguageLocalizationConfigsManager()
     {
         projectRootPath = Configs.Instance.Editor_ProjectRootFolderPath.Replace("\\", "/") + "/";
@@ -112,16 +93,36 @@ public class LanguageLocalizationConfigsManager
         }
         else
         {
-            Debug.Log("NONE");
             configFilePaths = new ConfigFilePaths();
             configFilePaths.selectedPaths = "";
             configFilePaths.paths = new List<string>();
             configFilePaths.relativePaths = new List<string>();
             XmlUtil.Serialize(configFilePaths, Configs.Instance.Editor_LanguageLocalizationConfigFilePath);
         }
-
         CleanNotExistsFileRecord();
     }
+
+
+    public List<string> GetPaths() => configFilePaths.paths;
+    public bool IsHavePaths() => configFilePaths.paths.Count != 0;
+    public bool IsDeleteRecordEmpty() => deleteRecord.Count == 0;
+    public string GetSelectedPath() => configFilePaths.selectedPaths;
+    public int GetSelectedConfigFileIndex() => ConfigFileIndex(configFilePaths.selectedPaths);
+    public string GetFullFilePathBaseOnProjectRootPath(string relativePath) => projectRootPath + relativePath;
+    public string GetRelativePath(string fullPath) => fullPath.Replace(projectRootPath, "");
+    public bool IsInProjectFolder(string fullPath) => fullPath.Contains(projectRootPath);
+
+    public int ConfigFileIndex(string selectFilePath)
+    {
+        for(int index=0;index<configFilePaths.paths.Count;index++)
+        {
+            if (selectFilePath == configFilePaths.paths[index])
+                return index;
+        }
+        return -1;
+    }
+
+    
 
     /// <summary>
     /// 添加路径记录
@@ -215,6 +216,10 @@ public class LanguageLocalizationConfigsManager
         return GetPaths();
     }
 
+    /// <summary>
+    /// 改变当前选择的配置文件路径
+    /// </summary>
+    /// <param name="path"></param>
     public void ChangeSelectedPath(string path)
     {
         if (GetPaths().Contains(path))

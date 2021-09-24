@@ -21,6 +21,7 @@ public class EditorGUIStyles
 
     public GUIStyle TitleStyle;
     public GUIStyle GirdTextBoldStyle;
+    public GUIStyle GirdTexMidAligntBoldStyle;
 
     private EditorGUIStyles()
     {
@@ -35,6 +36,13 @@ public class EditorGUIStyles
             GirdTextBoldStyle = new GUIStyle { fontSize = 12, fontStyle = FontStyle.Bold };
             GirdTextBoldStyle.alignment = TextAnchor.MiddleLeft;
             GirdTextBoldStyle.normal.textColor = Color.white;
+        }
+
+        if (GirdTexMidAligntBoldStyle == null)
+        {
+            GirdTexMidAligntBoldStyle = new GUIStyle();
+            GirdTexMidAligntBoldStyle.alignment = TextAnchor.MiddleCenter;
+            GirdTexMidAligntBoldStyle.normal.textColor = Color.white;
         }
     }
 }

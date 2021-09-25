@@ -171,11 +171,11 @@ public class LanguageLocalizationWindow : EditorWindow
             {
                 GameObject obj = AssetDatabase.LoadAssetAtPath<GameObject>(s);
                 GUILocalization[] comps = obj.GetComponentsInChildren<GUILocalization>();
-                List<List<string>> sheetData = new List<List<string>>();
+                Sheet sheetData = new Sheet();
                 //写入表头
-                List<string> sheet_title = new List<string> { "KEY" };
+                List<string> sheet_title = new List<string> { "ID", "KEY" };
                 sheet_title.AddRange(llec.languageList);
-                sheetData.Add(sheet_title);
+                sheetData.AddTtile(sheet_title);
 
                 //写入组件的数据
                 if (comps.Length > 0)
@@ -183,13 +183,14 @@ public class LanguageLocalizationWindow : EditorWindow
                     for(int i=0;i<comps.Length;i++)
                     {
                         List<string> row = new List<string>();
+                        row.Add($"[{i}]");
                         comps[i].key = $"{comps[i].gameObject.name}[{i}]";
                         row.Add(comps[i].key);
                         EditorUtility.SetDirty(obj);
                         AssetDatabase.SaveAssets();
                         for (int j = 0; j < llec.languageList.Count; j++)
                             row.Add("");
-                        sheetData.Add(row);
+                        sheetData.AddRow(row);
                     }
                 }
                 data.Add(obj.name, sheetData);
@@ -416,8 +417,10 @@ public class LanguageLocalizationWindow : EditorWindow
 
 
     private Dictionary<string, EditorExcelRowData> rowDic = new Dictionary<string, EditorExcelRowData>();
-    private List<List<string>> excel_sheet = new List<List<string>>();
+
     private ExcelData ui_excel_data = new ExcelData();
+    private Sheet excel_sheet = new Sheet();
+
     private Dictionary<string, int> language_index = new Dictionary<string, int>();
 
     private HelpInfo ui_localization_editor_info = new HelpInfo();
@@ -442,14 +445,14 @@ public class LanguageLocalizationWindow : EditorWindow
 
         foreach (var obj in ui_gameobject_list)
         {
-            List<List<string>> data = new List<List<string>>();
-            data.Add(new List<string> { "KEY" });
+            Sheet data = new Sheet();
+            data.AddTtile(new List<string> { "KEY" });
             data[0].AddRange(ui_language_list);
 
             GUILocalization[] locals = obj.GetComponentsInChildren<GUILocalization>();
             if (ui_excel_data.ContainsKey(obj.name))
             {
-                List<List<string>> tb = ui_excel_data[obj.name];
+                List<List<string>> tb = ui_excel_data[obj.name].SheetData();
                 foreach (var l in locals)
                 {
                     List<string> row = new List<string>();
@@ -473,7 +476,7 @@ public class LanguageLocalizationWindow : EditorWindow
                         foreach (var language in ui_language_list)
                             row.Add("");
                     }
-                    data.Add(row);
+                    data.AddRow(row);
                 }
             }
 
@@ -507,8 +510,6 @@ public class LanguageLocalizationWindow : EditorWindow
         if (ui_gameobject_list.Count > ui_gameobject_selected)
             ui_gameobject = ui_gameobject_list[ui_gameobject_selected];
 
-        int languageCount = 0; 
-
         var llce = XmlUtil.DeserializeFromFile<LocalizationLanguageEditorConfig>(LanguageLocalizationConfigsManager.Instance.GetSelectedPath());
         //Debug.Log($"现在加载的CONFIGS是：{LanguageLocalizationConfigsManager.Instance.GetSelectedPath()}");
         //读取Excel数据
@@ -523,9 +524,7 @@ public class LanguageLocalizationWindow : EditorWindow
                 List<List<string>> sheetData = null;
                 if (ui_excel_data.ContainsKey(sheetName))
                 {
-                    sheetData = ui_excel_data[sheetName];
-                    if (sheetData.Count > 0)
-                        languageCount = sheetData[0].Count - 1;
+                    sheetData = ui_excel_data[sheetName].SheetData();
                     foreach (var sd in sheetData)
                     {
                         rowDic.Add(sd[0], new EditorExcelRowData(null, sd));
@@ -535,9 +534,10 @@ public class LanguageLocalizationWindow : EditorWindow
         }
 
         //更新表头
-        List<string> title_list = new List<string> { "KEY" };
+        List<string> title_list = new List<string> { "ID", "KEY" };
         title_list.AddRange(ui_language_list);
-        excel_sheet.Add(title_list);
+        excel_sheet.AddTtile(title_list);
+        Debug.Log($"excel:{excel_sheet.GetColumnCount()}  ; title_list:{title_list.Count}");
 
         List<EditorExcelRowData> newData = new List<EditorExcelRowData>();
         //更新数据至表格编辑器
@@ -551,14 +551,14 @@ public class LanguageLocalizationWindow : EditorWindow
                     ui_localization_editor_info.SetState(false);
                     for (int i = 0; i < locals.Length; i++)
                     {
-                        ui_language_elem_dic.Add(excel_sheet.Count, locals[i].gameObject);
+                        //ui_language_elem_dic.Add(excel_sheet.Count(), locals[i].gameObject);
 
                         List<string> row = new List<string>();
                         if (rowDic.ContainsKey(locals[i].key))
                         {
                             rowDic[locals[i].key].comp = locals[i];
                             row = rowDic[locals[i].key].row_data;
-                            excel_sheet.Add(row);
+                            excel_sheet.AddRow(row);
                         }
                         else
                             newData.Add(new EditorExcelRowData(locals[i], null));
@@ -574,10 +574,11 @@ public class LanguageLocalizationWindow : EditorWindow
                     for (int i = 0; i < newData.Count; i++)
                     {
                         List<string> newRow = new List<string>();
+                        newRow.Add($"[{rowDic.Count + i - 1}]");
                         newRow.Add($"{newData[i].comp.gameObject.name}[{rowDic.Count + i - 1}]");
-                        for (int j = 0; j < languageCount; j++)
+                        for (int j = 0; j < ui_language_list.Count; j++)
                             newRow.Add("");
-                        excel_sheet.Add(newRow);
+                        Debug.Log(excel_sheet.AddRow(newRow));
                         newData[i].row_data = newRow;
                         if(rowDic.ContainsKey(newRow[0]))
                         {
@@ -634,7 +635,7 @@ public class LanguageLocalizationWindow : EditorWindow
             //    if (excel_sheet[0].Count != 0)
             //        Debug.Log($"cols:{excel_sheet.Count},row:{excel_sheet[0].Count}");
             EditorGUILayout.Space(10);
-            for (int i = 0; i < excel_sheet.Count; i++)
+            for (int i = 0; i < excel_sheet.GetRowCount(); i++)
             {
                 EditorGUILayout.BeginHorizontal();
                 if (i == 0)

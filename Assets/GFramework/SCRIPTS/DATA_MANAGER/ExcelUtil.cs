@@ -8,26 +8,222 @@ using OfficeOpenXml.Style;
 using System.Data;
 using System.Text;
 using System.IO;
+using System;
+
+/// <summary>
+/// Sheet表格
+/// </summary>
+public class Sheet
+{
+    private List<List<string>> sheetData;
+    private List<int> primaryKeys;
+
+    public List<string> ColumnTitles()
+    {
+        if (sheetData.Count > 0)
+            return sheetData[0];
+        else
+            return default;
+    }
+    public List<List<string>> SheetData() => sheetData;
+    public int GetRowCount() => sheetData.Count;
+    public int GetColumnCount()
+    {
+        if (sheetData.Count > 0)
+            return sheetData[0].Count;
+        else
+            return 0;
+    }
+    public int GetRowCountWithoutTitle() => GetRowCount() - 1;
+    public int GetColumnCountWithoutTitle() => GetColumnCount() - 1;
+
+    public string this[int row,int col]
+    {
+        get
+        {
+            if (sheetData.Count > 0)
+            {
+                if (row < sheetData.Count && col < sheetData[0].Count)
+                {
+                    return sheetData[row][col];
+                }
+                return default;
+            }
+            return default;
+        }
+        set
+        {
+            if (sheetData.Count > 0)
+            {
+                if (row < sheetData.Count && col <= sheetData[0].Count)
+                {
+                    sheetData[row][col] = value;
+                }
+            }
+        }
+    }
+
+    public List<string> this[int row]
+    {
+        get
+        {
+            if (row >= 0)
+                if (row < sheetData.Count)
+                    return sheetData[row];
+            return default;
+        }
+        set
+        {
+            if (sheetData[0].Count != value.Count)
+                return;
+            if (row >= 0)
+                if (row < sheetData.Count)
+                    sheetData[row] = value;
+        }
+    }
+
+    public Sheet()
+    {
+        sheetData = new List<List<string>>();
+        primaryKeys = new List<int>();
+    }
+
+    public Sheet(List<string> titles)
+    {
+        sheetData = new List<List<string>>();
+        primaryKeys = new List<int>();
+    }
+
+    public bool AddPrimaryKey(int index)
+    {
+        if (index >= sheetData[0].Count)
+            return false;
+        if (!primaryKeys.Contains(index))
+            primaryKeys.Add(index);
+        return true;
+    }
+
+    public bool AddPrimaryKey(string title)
+    {
+        if (sheetData.Count > 0)
+        {
+            if (!sheetData[0].Contains(title))
+                return false;
+            int index = sheetData[0].IndexOf(title);
+            if (!primaryKeys.Contains(index))
+                primaryKeys.Add(index);
+            return true;
+        }
+        else
+            return false;
+    }
+
+    public bool AddTtile(List<string> titles,List<Type> types=default)
+    {
+        if (sheetData.Count == 0)
+            sheetData.Add(titles);
+        else
+            sheetData[0] = titles;
+        return true;
+    }
+
+    public bool AddColumn(string title)
+    {
+        if(sheetData.Count>0)
+        {
+            if (sheetData[0].Contains(title))
+                return false;
+            return true;
+        }
+        else
+        {
+            sheetData.Add(new List<string> { title });
+            return true;
+        }
+    }
+
+    public bool RemoveColume(string title)
+    {
+        if (sheetData.Count > 0)
+        {
+            if (sheetData[0].Contains(title))
+            {
+                int index = sheetData[0].IndexOf(title);
+                for (int i = 0; i < sheetData.Count; i++)
+                    sheetData.RemoveAt(index);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public bool AddRow(List<string> row)
+    {
+        if(sheetData.Count>0)
+        {
+            if (row.Count != GetColumnCount())
+            {
+                GDebug.Instance.Error($"添加数据错误：当前表格列数：{GetColumnCount()}  添加Row的列数:{row.Count}");
+                return false;
+            }
+        }
+        else
+        {
+            GDebug.Instance.Warn("当前表格为添加表头就填充数据。");
+        }
+
+        foreach(var r in sheetData)
+        {
+            foreach(var key in primaryKeys)
+            {
+                if (r[key] == row[key])
+                    return false;
+            }
+        }
+
+        sheetData.Add(row);
+        return true;
+    }
+
+    public bool RemoveRow(int rowIndex)
+    {
+        if (sheetData.Count <= rowIndex)
+            return false;
+        sheetData.RemoveAt(rowIndex);
+        return true;
+    }
+
+    public void Clear()
+    {
+        sheetData.Clear();
+        primaryKeys.Clear();
+    }
+}
 
 public class ExcelData
 {
-    private Dictionary<string, List<List<string>>> excel_data_map;
+    /// <summary>
+    /// excel_data_map:
+    /// Key:表格的名称
+    /// value:二维数组
+    /// </summary>
+    private Dictionary<string, Sheet> excel_data_map;
 
     public ExcelData()
     {
-        excel_data_map = new Dictionary<string, List<List<string>>>();
+        excel_data_map = new Dictionary<string, Sheet>();
     }
 
-    public Dictionary<string,List<List<string>>> GetData() =>excel_data_map;
+    public Dictionary<string,Sheet> GetData() =>excel_data_map;
 
-    public bool Add(string sheetName,List<List<string>> data)
+    public bool Add(string sheetName, Sheet sheet)
     {
         if(excel_data_map.ContainsKey(sheetName))
         {
             GDebug.Instance.Error($"ExcelData中：表格{sheetName}已经存在");
             return false;
         }    
-        excel_data_map.Add(sheetName, data);
+        excel_data_map.Add(sheetName, sheet);
         return true;
     }
 
@@ -44,7 +240,7 @@ public class ExcelData
 
     public bool ContainsKey(string sheetName) => excel_data_map.ContainsKey(sheetName);
 
-    public List<List<string>> this[string sheetName]
+    public Sheet this[string sheetName]
     {
         get
         {
@@ -79,7 +275,7 @@ public class ExcelUtil
 
                     if (worksheet != null)
                     {
-                        List<List<string>> dt = new List<List<string>>();
+                        Sheet dt = new Sheet();
                         int rowCount = worksheet.Dimension.Rows;
                         int colCount = worksheet.Dimension.Columns;
                         for (int row = titleIndex; row <= rowCount; row++)
@@ -87,7 +283,10 @@ public class ExcelUtil
                             List<string> col_list = new List<string>();
                             for (int col = 1; col <= colCount; col++)
                                 col_list.Add(worksheet.Cells[row, col].Value.ToString());
-                            dt.Add(col_list);
+                            if (row == 1)
+                                dt.AddTtile(col_list);
+                            else
+                                dt.AddRow(col_list);
                         }
                         ed.Add(worksheet.Name, dt);
                     }
@@ -126,7 +325,7 @@ public class ExcelUtil
             foreach(var worksheet in ed.GetData())
             {
                 ExcelWorksheet worksheetIn = package.Workbook.Worksheets.Add(worksheet.Key);
-                for (int i = 0; i < worksheet.Value.Count; i++)
+                for (int i = 0; i < worksheet.Value.GetRowCount(); i++)
                 {
                     for (int j = 0; j < worksheet.Value[i].Count; j++)
                     {

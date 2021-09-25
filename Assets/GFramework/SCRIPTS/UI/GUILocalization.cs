@@ -7,6 +7,7 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Text))]
 public class GUILocalization : MonoBehaviour
 {
+    [DisplayOnly] public string hashCode;
     [DisplayOnly] public string key;
 
     private void Start()

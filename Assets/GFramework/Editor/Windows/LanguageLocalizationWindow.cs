@@ -136,7 +136,11 @@ public class LanguageLocalizationWindow : EditorWindow
                 if (config.gameObjectPathsInProject != null)
                 {
                     foreach (var p in config.gameObjectPathsInProject)
-                        ui_gameobject_list.Add(AssetDatabase.LoadAssetAtPath<GameObject>(p));
+                    {
+                        GameObject go = AssetDatabase.LoadAssetAtPath<GameObject>(p);
+                        ui_gameobject_list.Add(go);
+                        //Debug.Log($"{go.name}的HashCode：{go.GetHashCode()}  {go.name}的InstanceID：{go.GetInstanceID()}");
+                    }
                 }
 
                 if (config.languageList != null)
@@ -183,8 +187,9 @@ public class LanguageLocalizationWindow : EditorWindow
                     for(int i=0;i<comps.Length;i++)
                     {
                         List<string> row = new List<string>();
-                        row.Add($"[{i}]");
-                        comps[i].key = $"{comps[i].gameObject.name}[{i}]";
+                        row.Add($"[{comps[i].gameObject.GetHashCode()}]");
+                        comps[i].hashCode = comps[i].gameObject.GetHashCode().ToString();
+                        comps[i].key = $"{comps[i].gameObject.name}";
                         row.Add(comps[i].key);
                         EditorUtility.SetDirty(obj);
                         AssetDatabase.SaveAssets();
@@ -554,10 +559,10 @@ public class LanguageLocalizationWindow : EditorWindow
                         //ui_language_elem_dic.Add(excel_sheet.Count(), locals[i].gameObject);
 
                         List<string> row = new List<string>();
-                        if (rowDic.ContainsKey(locals[i].key))
+                        if (rowDic.ContainsKey(locals[i].hashCode))
                         {
-                            rowDic[locals[i].key].comp = locals[i];
-                            row = rowDic[locals[i].key].row_data;
+                            rowDic[locals[i].hashCode].comp = locals[i];
+                            row = rowDic[locals[i].hashCode].row_data;
                             excel_sheet.AddRow(row);
                         }
                         else
@@ -574,7 +579,7 @@ public class LanguageLocalizationWindow : EditorWindow
                     for (int i = 0; i < newData.Count; i++)
                     {
                         List<string> newRow = new List<string>();
-                        newRow.Add($"[{rowDic.Count + i - 1}]");
+                        newRow.Add($"[{newData[i].comp.gameObject.GetHashCode()}]");
                         newRow.Add($"{newData[i].comp.gameObject.name}[{rowDic.Count + i - 1}]");
                         for (int j = 0; j < ui_language_list.Count; j++)
                             newRow.Add("");
@@ -615,7 +620,7 @@ public class LanguageLocalizationWindow : EditorWindow
     /// </summary>
     private void LocalizationDataTableEditorGUI()
     {
-        gird_width = ((int)position.width-40) / (ui_language_list.Count + 2) - 5;
+        gird_width = ((int)position.width- 100) / (ui_language_list.Count + 2) - 5;
 
         GEditorGUI.Title("本地化数据表格编辑器", height: 30);
 
@@ -640,9 +645,9 @@ public class LanguageLocalizationWindow : EditorWindow
                 EditorGUILayout.BeginHorizontal();
                 if (i == 0)
                 {
-                    EditorGUILayout.LabelField("ID", EditorGUIStyles.Instance.GirdTexMidAligntBoldStyle, new[] { GUILayout.Height(15), GUILayout.Width(40) });
+                    EditorGUILayout.LabelField("ID", EditorGUIStyles.Instance.GirdTexMidAligntBoldStyle, new[] { GUILayout.Height(15), GUILayout.Width(100) });
                     EditorGUILayout.LabelField("GameObject", EditorGUIStyles.Instance.GirdTextBoldStyle, new[] { GUILayout.Height(15), GUILayout.Width(gird_width) });
-                    for (int j = 0; j < excel_sheet[i].Count; j++)
+                    for (int j = 1; j < excel_sheet[i].Count; j++)
                         EditorGUILayout.LabelField(excel_sheet[i][j], EditorGUIStyles.Instance.GirdTextBoldStyle, new[] { GUILayout.Height(15), GUILayout.Width(gird_width) });
                 }
                 else
@@ -658,9 +663,9 @@ public class LanguageLocalizationWindow : EditorWindow
                             return;
                         }
                     }
-                    EditorGUILayout.LabelField("[100]", EditorGUIStyles.Instance.GirdTexMidAligntBoldStyle, new[] { GUILayout.Height(40), GUILayout.Width(40) });
+                    EditorGUILayout.LabelField(excel_sheet[i][0], EditorGUIStyles.Instance.GirdTexMidAligntBoldStyle, new[] { GUILayout.Height(40), GUILayout.Width(100) });
                     EditorGUILayout.ObjectField(go, typeof(GameObject),true, new[] { GUILayout.Height(40), GUILayout.Width(gird_width) });
-                    for (int j = 0; j < excel_sheet[i].Count; j++)
+                    for (int j = 1; j < excel_sheet.GetColumnCount(); j++)
                         excel_sheet[i][j] = EditorGUILayout.TextArea(excel_sheet[i][j], new[] { GUILayout.Height(40), GUILayout.Width(gird_width) });
 
                 }
@@ -679,18 +684,32 @@ public class LanguageLocalizationWindow : EditorWindow
             {
                 if (EditorUtility.DisplayDialog("警告", "此操作将会写入持久化数据\n请确认是否保存修改。", "确认", "取消"))
                 {
-                    //ExcelUtil.Write(Application.streamingAssetsPath + "/language_localization.xlsx", excel_sheet, ui_game_object_name_list[ui_gameobject_selected]);
                     string name = ui_game_object_name_list[ui_gameobject_selected];
-                    if (ui_excel_data.ContainsKey(name))
-                        ui_excel_data[name] = excel_sheet;
                     var llce = XmlUtil.DeserializeFromFile<LocalizationLanguageEditorConfig>(LanguageLocalizationConfigsManager.Instance.GetSelectedPath());
                     if (llce != default)
+                    {
+                        ui_excel_data = ExcelUtil.Read(LanguageLocalizationConfigsManager.Instance.GetFullFilePathBaseOnProjectRootPath(llce.languageLocalizationExcelFilePath));
+                        if (ui_excel_data.ContainsKey(name))
+                            ui_excel_data[name] = excel_sheet;
                         ExcelUtil.Write(LanguageLocalizationConfigsManager.Instance.GetFullFilePathBaseOnProjectRootPath(llce.languageLocalizationExcelFilePath), ui_excel_data);
+                    }
 
-
-                    foreach(var r in rowDic)
-                        EditorUtility.SetDirty(r.Value.comp.gameObject);
-                    AssetDatabase.SaveAssets();
+                    for(int index=0;index< excel_sheet.GetRowCount();index++)
+                    {
+                        string hashCode = excel_sheet[index][0];
+                        if (rowDic.ContainsKey(hashCode))
+                        {
+                            if (rowDic[hashCode].comp != null)
+                            {
+                                GameObject go = rowDic[hashCode].comp.gameObject;
+                                rowDic[hashCode].comp.gameObject.GetComponent<GUILocalization>().hashCode = hashCode;
+                                rowDic[hashCode].comp.gameObject.GetComponent<GUILocalization>().key = excel_sheet[index][1];
+                                rowDic[hashCode].comp.gameObject.GetComponent<GUILocalization>().name = $"@dynamic_text_{excel_sheet[index][1]}";
+                                EditorUtility.SetDirty(rowDic[hashCode].comp.gameObject);
+                                AssetDatabase.SaveAssets();
+                            }
+                        }    
+                    }
                 }
                 else
                     Debug.Log("取消修改");

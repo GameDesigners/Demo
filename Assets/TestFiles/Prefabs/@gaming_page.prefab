@@ -250,7 +250,7 @@ GameObject:
   - component: {fileID: 8055197958165308968}
   - component: {fileID: 3575836720384239257}
   m_Layer: 0
-  m_Name: Text
+  m_Name: '@dynamic_text_world'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -316,7 +316,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 
+  m_Text: K
 --- !u!114 &3575836720384239257
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -329,7 +329,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3cff46add221ca46b8e149ad6a53e5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  key: Text[1]
+  hashCode: '[16348]'
+  key: world
 --- !u!1 &8055197958626610035
 GameObject:
   m_ObjectHideFlags: 0
@@ -439,7 +440,7 @@ GameObject:
   - component: {fileID: 8055197958693160094}
   - component: {fileID: 4711208165747153171}
   m_Layer: 0
-  m_Name: title
+  m_Name: '@dynamic_text_hello'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -505,7 +506,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 
+  m_Text: "\u6E38\u620F\u6807\u9898"
 --- !u!114 &4711208165747153171
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -518,4 +519,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3cff46add221ca46b8e149ad6a53e5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  key: title[0]
+  hashCode: '[16046]'
+  key: hello

@@ -3096,7 +3096,7 @@ GameObject:
   - component: {fileID: 156909559765685887}
   - component: {fileID: 8187761416897979284}
   m_Layer: 0
-  m_Name: '@text_xxx'
+  m_Name: "@dynamic_text_\u4E0D\u597D"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3141,7 +3141,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3cff46add221ca46b8e149ad6a53e5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  key: '@text_xxx[0]'
+  hashCode: '[16106]'
+  key: "\u4E0D\u597D"
 --- !u!114 &8187761416897979284
 MonoBehaviour:
   m_ObjectHideFlags: 0

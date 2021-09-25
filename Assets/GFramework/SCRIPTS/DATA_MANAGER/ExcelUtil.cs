@@ -266,35 +266,42 @@ public class ExcelUtil
     {
         if (File.Exists(filepath))
         {
-            ExcelData ed = new ExcelData();
-            FileStream fs = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
-            using (ExcelPackage package = new ExcelPackage(fs))
+            try
             {
-                foreach (var worksheet in package.Workbook.Worksheets)
+                ExcelData ed = new ExcelData();
+                FileStream fs = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+                using (ExcelPackage package = new ExcelPackage(fs))
                 {
-
-                    if (worksheet != null)
+                    foreach (var worksheet in package.Workbook.Worksheets)
                     {
-                        Sheet dt = new Sheet();
-                        int rowCount = worksheet.Dimension.Rows;
-                        int colCount = worksheet.Dimension.Columns;
-                        for (int row = titleIndex; row <= rowCount; row++)
+
+                        if (worksheet != null)
                         {
-                            List<string> col_list = new List<string>();
-                            for (int col = 1; col <= colCount; col++)
-                                col_list.Add(worksheet.Cells[row, col].Value.ToString());
-                            if (row == 1)
-                                dt.AddTtile(col_list);
-                            else
-                                dt.AddRow(col_list);
+                            Sheet dt = new Sheet();
+                            int rowCount = worksheet.Dimension.Rows;
+                            int colCount = worksheet.Dimension.Columns;
+                            for (int row = titleIndex; row <= rowCount; row++)
+                            {
+                                List<string> col_list = new List<string>();
+                                for (int col = 1; col <= colCount; col++)
+                                    col_list.Add(worksheet.Cells[row, col].Value.ToString());
+                                if (row == 1)
+                                    dt.AddTtile(col_list);
+                                else
+                                    dt.AddRow(col_list);
+                            }
+                            ed.Add(worksheet.Name, dt);
                         }
-                        ed.Add(worksheet.Name, dt);
+                        else
+                            GDebug.Instance.Error($"当前获取的WorkSheet为空...");
                     }
-                    else
-                        GDebug.Instance.Error($"当前获取的WorkSheet为空...");
+                    fs.Close();
+                    return ed;
                 }
-                fs.Close();
-                return ed;
+            }
+            catch (Exception ex)
+            {
+                GDebug.Instance.Error($"写入失败！【很有可能是当前文件处于打开状态而无法写入】\n{ex}");
             }
         }
         else if (Path.GetExtension(filepath) != ".xlsx")
@@ -306,35 +313,42 @@ public class ExcelUtil
 
     public static void Write(string filepath,ExcelData ed)
     {
-        if (Path.GetExtension(filepath) != ".xlsx")
+        try
         {
-            GDebug.Instance.Error($"将要存储的文件格式不合法[非.xlsx] path:{filepath}");
-            return;
-        }
-
-        string directoryPath = Path.GetDirectoryName(filepath);
-        if (!Directory.Exists(directoryPath))
-            Directory.CreateDirectory(directoryPath);
-
-        if (File.Exists(filepath))
-            File.Delete(filepath);
-
-        FileStream fs = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
-        using(ExcelPackage package=new ExcelPackage(fs))
-        {
-            foreach(var worksheet in ed.GetData())
+            if (Path.GetExtension(filepath) != ".xlsx")
             {
-                ExcelWorksheet worksheetIn = package.Workbook.Worksheets.Add(worksheet.Key);
-                for (int i = 0; i < worksheet.Value.GetRowCount(); i++)
+                GDebug.Instance.Error($"将要存储的文件格式不合法[非.xlsx] path:{filepath}");
+                return;
+            }
+
+            string directoryPath = Path.GetDirectoryName(filepath);
+            if (!Directory.Exists(directoryPath))
+                Directory.CreateDirectory(directoryPath);
+
+            if (File.Exists(filepath))
+                File.Delete(filepath);
+
+            FileStream fs = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+            using (ExcelPackage package = new ExcelPackage(fs))
+            {
+                foreach (var worksheet in ed.GetData())
                 {
-                    for (int j = 0; j < worksheet.Value[i].Count; j++)
+                    ExcelWorksheet worksheetIn = package.Workbook.Worksheets.Add(worksheet.Key);
+                    for (int i = 0; i < worksheet.Value.GetRowCount(); i++)
                     {
-                        worksheetIn.Cells[i + 1, j + 1].Value = worksheet.Value[i][j];
+                        for (int j = 0; j < worksheet.Value[i].Count; j++)
+                        {
+                            worksheetIn.Cells[i + 1, j + 1].Value = worksheet.Value[i][j];
+                        }
                     }
                 }
+                package.Save();
             }
-            package.Save();
+            fs.Close();
         }
-        fs.Close();
+        catch(Exception ex)
+        {
+            GDebug.Instance.Error($"写入失败！【很有可能是当前文件处于打开状态而无法写入】\n{ex}");
+        }
     }
 }

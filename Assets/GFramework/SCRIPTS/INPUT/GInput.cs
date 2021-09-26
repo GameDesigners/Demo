@@ -364,6 +364,8 @@ public class GInput
         return false;
     }
 
+    public Vector3 GetMousePosition() => Input.mousePosition;
+
     public void ClearModifyRecord()
     {
         modify_record.handle_btns.Clear();

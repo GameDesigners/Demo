@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <ConfigFilePaths xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <selectedPaths>F:/GithubProjects/Demo/EditorConfigs/01.config</selectedPaths>
+  <selectedPaths>E:/ZhuSenlin Project/[0]Game Dev Projects/UnityGameFrameworkDemo/EditorConfigs/01.config</selectedPaths>
   <paths>
-    <string>F:/GithubProjects/Demo/EditorConfigs/01.config</string>
-    <string>F:/GithubProjects/Demo/EditorConfigs/02.config</string>
-    <string>F:/GithubProjects/Demo/EditorConfigs/03.config</string>
-    <string>F:/GithubProjects/Demo/EditorConfigs/04.config</string>
-    <string>F:/GithubProjects/Demo/EditorConfigs/05.config</string>
-    <string>F:/GithubProjects/Demo/EditorConfigs/06.config</string>
+    <string>E:/ZhuSenlin Project/[0]Game Dev Projects/UnityGameFrameworkDemo/EditorConfigs/01.config</string>
+    <string>E:/ZhuSenlin Project/[0]Game Dev Projects/UnityGameFrameworkDemo/EditorConfigs/02.config</string>
+    <string>E:/ZhuSenlin Project/[0]Game Dev Projects/UnityGameFrameworkDemo/EditorConfigs/03.config</string>
+    <string>E:/ZhuSenlin Project/[0]Game Dev Projects/UnityGameFrameworkDemo/EditorConfigs/04.config</string>
+    <string>E:/ZhuSenlin Project/[0]Game Dev Projects/UnityGameFrameworkDemo/EditorConfigs/05.config</string>
+    <string>E:/ZhuSenlin Project/[0]Game Dev Projects/UnityGameFrameworkDemo/EditorConfigs/06.config</string>
   </paths>
   <relativePaths>
     <string>EditorConfigs/01.config</string>

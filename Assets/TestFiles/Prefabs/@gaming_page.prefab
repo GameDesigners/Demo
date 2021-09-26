@@ -250,7 +250,7 @@ GameObject:
   - component: {fileID: 8055197958165308968}
   - component: {fileID: 3575836720384239257}
   m_Layer: 0
-  m_Name: '@dynamic_text_world'
+  m_Name: '@dynamic_text_@dynamic_text_world'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -329,8 +329,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3cff46add221ca46b8e149ad6a53e5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hashCode: '[16348]'
-  key: world
+  hashCode: 16294
+  key: '@dynamic_text_@dynamic_text_world'
 --- !u!1 &8055197958626610035
 GameObject:
   m_ObjectHideFlags: 0
@@ -440,7 +440,7 @@ GameObject:
   - component: {fileID: 8055197958693160094}
   - component: {fileID: 4711208165747153171}
   m_Layer: 0
-  m_Name: '@dynamic_text_hello'
+  m_Name: '@dynamic_text_@dynamic_text_hello'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -519,5 +519,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3cff46add221ca46b8e149ad6a53e5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hashCode: '[16046]'
-  key: hello
+  hashCode: 15976
+  key: '@dynamic_text_@dynamic_text_hello'

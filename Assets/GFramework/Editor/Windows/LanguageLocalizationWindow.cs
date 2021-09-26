@@ -506,7 +506,6 @@ public class LanguageLocalizationWindow : EditorWindow
     private void RefreshLocalizationLanguageDataTable()
     {
         ui_language_elem_dic.Clear();
-
         rowDic.Clear();
         excel_sheet.Clear();
 
@@ -580,7 +579,7 @@ public class LanguageLocalizationWindow : EditorWindow
                     {
                         List<string> newRow = new List<string>();
                         newRow.Add($"[{newData[i].comp.gameObject.GetHashCode()}]");
-                        newRow.Add($"{newData[i].comp.gameObject.name}[{rowDic.Count + i - 1}]");
+                        newRow.Add($"{newData[i].comp.gameObject.name}");
                         for (int j = 0; j < ui_language_list.Count; j++)
                             newRow.Add("");
                         Debug.Log(excel_sheet.AddRow(newRow));

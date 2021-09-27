@@ -21,6 +21,7 @@ public class Main : MonoBehaviour
         NetManager.AddListener("Enter", OnEnter);
         NetManager.AddListener("List", OnList);
         NetManager.AddListener("Move", OnMove);
+        NetManager.AddListener("Attack", OnAttack);
         NetManager.AddListener("Leave", OnLeave);
         NetManager.Connect("192.168.3.42", 8888);
 
@@ -119,10 +120,51 @@ public class Main : MonoBehaviour
     private void OnMove(string msgArgs)
     {
         GDebug.Instance.Log($"[OnMove]  {msgArgs}");
+
+        //解析参数
+        string[] split = msgArgs.Split(',');
+        string desc = split[0];
+        float x = float.Parse(split[1]);
+        float y = float.Parse(split[2]);
+        float z = float.Parse(split[3]);
+
+        //移动
+        if (!otherHumans.ContainsKey(desc))
+            return;
+
+        BaseHuman h = otherHumans[desc];
+        Vector3 targetPos = new Vector3(x, y, z);
+        h.MoveTo(targetPos);
+    }
+
+    private void OnAttack(string msgArgs)
+    {
+        GDebug.Instance.Log($"[OnAttack]  {msgArgs}");
+
+        //解析参数
+        string[] split = msgArgs.Split(',');
+        string desc = split[0];
+        float eulY = float.Parse(split[1]);
+
+        //攻击动作
+        if (!otherHumans.ContainsKey(desc))
+            return;
+        SyncHuman h = otherHumans[desc] as SyncHuman;
+        h.SyncAttack(eulY);
     }
 
     private void OnLeave(string msgArgs)
     {
         GDebug.Instance.Log($"[OnLeave]  {msgArgs}");
+        string[] split = msgArgs.Split(',');
+        string desc = split[0];
+
+        //删除角色
+        if (!otherHumans.ContainsKey(desc))
+            return;
+
+        BaseHuman h = otherHumans[desc];
+        Destroy(h.gameObject);
+        otherHumans.Remove(desc);
     }
 }

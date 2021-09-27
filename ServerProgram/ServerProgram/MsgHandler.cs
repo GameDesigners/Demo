@@ -25,9 +25,30 @@ namespace ServerProgram
 
             //广播
             string sendStr = $"Enter|{msgArgs}";
-            byte[] sendBytes = System.Text.Encoding.Default.GetBytes(sendStr);
+
             foreach (ClientState cs in Program.clients.Values)
-                cs.socket.Send(sendBytes);
+                Program.Send(cs, sendStr);
+        }
+
+        public static void MsgMove(ClientState c,string msgArg)
+        {
+            string[] split = msgArg.Split(',');
+
+            //解析参数
+            string desc = split[0];
+            float x = float.Parse(split[1]);
+            float y = float.Parse(split[2]);
+            float z = float.Parse(split[3]);
+
+            //服务器端数据赋值
+            c.x = x;
+            c.y = y;
+            c.z = z;
+
+            //广播
+            string sendStr = $"Move|{msgArg}";
+            foreach (ClientState cs in Program.clients.Values)
+                Program.Send(cs, sendStr);
         }
 
         public static void MsgList(ClientState c,string msgArgs)
@@ -44,9 +65,16 @@ namespace ServerProgram
                 sendStr += cs.hp.ToString() + ",";
             }
 
-            byte[] sendBytes = System.Text.Encoding.Default.GetBytes(sendStr);
             foreach (ClientState cs in Program.clients.Values)
-                cs.socket.Send(sendBytes);
+                Program.Send(cs, sendStr);
+        }
+
+        public static void MsgAttack(ClientState c,string msgArgs)
+        {
+            //广播
+            string sendStr = $"Attack|{msgArgs}";
+            foreach(ClientState cs in Program.clients.Values)
+                Program.Send(cs, sendStr);
         }
     }
 }

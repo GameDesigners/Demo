@@ -13,9 +13,10 @@ public class BaseHuman : MonoBehaviour
     /// 移动速度
     /// </summary>
     /// 
-
-
     public float speed = 5f;
+
+    internal bool isAttacking;
+    internal float attackTime = float.MinValue;
 
     /// <summary>
     /// 是否正在移动
@@ -33,10 +34,12 @@ public class BaseHuman : MonoBehaviour
     private Animator animator;
 
     private int IS_MOVING_ANIM_PARAM;
+    private int IS_ATTACK_ANIM_PARAM;
 
     protected void Awake()
     {
         IS_MOVING_ANIM_PARAM = Animator.StringToHash("isMoving");
+        IS_ATTACK_ANIM_PARAM = Animator.StringToHash("isAttacking");
     }
 
     protected void Start()
@@ -47,6 +50,7 @@ public class BaseHuman : MonoBehaviour
     protected void Update()
     {
         MoveUpdate();
+        AttackUpdate();
     }
 
     /// <summary>
@@ -76,6 +80,27 @@ public class BaseHuman : MonoBehaviour
             isMoving = false;
             animator.SetBool(IS_MOVING_ANIM_PARAM, false);
         }
+    }
+
+    //发起攻击
+    public void Attack()
+    {
+        isAttacking = true;
+        attackTime = Time.time;
+        animator.SetBool(IS_ATTACK_ANIM_PARAM, true);
+    }
+
+    public void AttackUpdate()
+    {
+        if (!isAttacking) 
+            return;
+
+        //等待动画播放完
+        if (Time.time - attackTime < 0.24f)
+            return;
+        
+        isAttacking = false;
+        animator.SetBool(IS_ATTACK_ANIM_PARAM, false);
     }
 
 

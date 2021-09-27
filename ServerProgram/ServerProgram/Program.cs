@@ -117,5 +117,11 @@ namespace ServerProgram
             mi.Invoke(null, o);
             return true;
         }
+
+        public static void Send(ClientState cs,string sendStr)
+        {
+            byte[] sendBytes = System.Text.Encoding.Default.GetBytes(sendStr);
+            cs.socket.Send(sendBytes);
+        }
     }
 }

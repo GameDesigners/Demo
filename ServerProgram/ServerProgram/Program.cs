@@ -34,7 +34,7 @@ namespace ServerProgram
         static void Main(string[] args)
         {
             listenfd = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            IPAddress ipAdr = IPAddress.Parse("192.168.3.42");
+            IPAddress ipAdr = IPAddress.Parse("192.168.0.114");
             IPEndPoint ipEp = new IPEndPoint(ipAdr, 8888);
             listenfd.Bind(ipEp);
             listenfd.Listen(0);
@@ -65,11 +65,11 @@ namespace ServerProgram
         /// <param name="listenfd"></param>
         public static void ReadListenerfd(Socket listenfd)
         {
-            Console.WriteLine("Accept");
             Socket clientfd = listenfd.Accept();
             ClientState state = new ClientState();
             state.socket = clientfd;
             clients.Add(clientfd, state);
+            Console.WriteLine($"CLIENT [{clientfd.RemoteEndPoint}] Socket Connect");
         }
 
         public static bool ReadClientfd(Socket clientfd)
@@ -99,9 +99,9 @@ namespace ServerProgram
                 object[] ob = { state };
                 mei.Invoke(null, ob);
 
+                Console.WriteLine($"CLIENT [{clientfd.RemoteEndPoint}] Socket Close");
                 clientfd.Close();
                 clients.Remove(clientfd);
-                Console.WriteLine("Socket Close");
                 return false;
             }
 

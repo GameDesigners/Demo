@@ -3,24 +3,31 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
 using UnityEngine;
-
+using UnityEngine.UI;
 public class TestNetwork : MonoBehaviour
 {
-    Socket socket;
-    // Start is called before the first frame update
+    public Button connectBtn;
+    public Button disconnectBtn;
     void Start()
     {
-        Timer timer = new Timer(SleepTimeout, null, 5000, 0);
-    }
+        connectBtn.onClick.AddListener(() =>
+        {
+            GNetworkManager.Connect("192.168.0.114", 8888);
+        });
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+        disconnectBtn.onClick.AddListener(() =>
+        {
+            GNetworkManager.Close();
+        });
 
-    private void SleepTimeout(System.Object state)
-    {
-        Debug.Log("Finish Timer");
+        GNetworkManager.AddNetEventListener(NetEvent.ConnectSucc, (str) =>
+        {
+            GDebug.Instance.Log("服务器连接成功");
+        });
+
+        GNetworkManager.AddNetEventListener(NetEvent.Close, (str) =>
+        {
+            GDebug.Instance.Log("本机成功断开连接。");
+        });
     }
 }

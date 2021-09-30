@@ -142,6 +142,21 @@ namespace Framework.DataManager
             }
         }
 
+        public static object DeserializeFromString(string json,Type type)
+        {
+            if (json.Length == 0 || !type.IsSerializable)
+                return default;
+            try
+            {
+                return JsonUtility.FromJson(json,type);
+            }
+            catch (Exception ex)
+            {
+                GDebug.Instance.Error(ex.ToString());
+                return default;
+            }
+        }
+
         public static void LoadObjectDataFromFile<T>(string filePath,ref T value)
         {
             if (filePath.Length == 0 && !typeof(T).IsSerializable)
@@ -180,7 +195,8 @@ namespace Framework.DataManager
         /// 序列化对象为字符串
         /// </summary>
         /// <typeparam name="T">序列化对象的类型</typeparam>
-        /// <param name="obj">序列化对象</param>
+        /// <param name="obj">序列化对象</param
+        /// <param name="prettyPrint">是否转化成可读的格式</param>
         /// <returns>相对应的json字符串</returns>
         public static string Serialize<T>(T obj, bool prettyPrint = false) where T : class
         {

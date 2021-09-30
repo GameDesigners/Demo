@@ -4,6 +4,10 @@ using System.Net.Sockets;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
+using Framework.GNetwork;
+using System.Net;
+using System.Linq;
+
 public class TestNetwork : MonoBehaviour
 {
     public Button connectBtn;
@@ -12,7 +16,7 @@ public class TestNetwork : MonoBehaviour
     {
         connectBtn.onClick.AddListener(() =>
         {
-            GNetworkManager.Connect("192.168.0.114", 8888);
+            GNetworkManager.Connect(GetIp(), 8888);
         });
 
         disconnectBtn.onClick.AddListener(() =>
@@ -30,4 +34,11 @@ public class TestNetwork : MonoBehaviour
             GDebug.Instance.Log("本机成功断开连接。");
         });
     }
+
+    public void Update()
+    {
+        GNetworkManager.Update();
+    }
+
+    public string GetIp() => Dns.GetHostEntry(Dns.GetHostName()).AddressList.FirstOrDefault(p => p.AddressFamily.ToString() == "InterNetwork")?.ToString();
 }

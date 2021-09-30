@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
-
+using System.Linq;
 namespace ServerProgram
 {
 
@@ -34,7 +34,7 @@ namespace ServerProgram
         static void Main(string[] args)
         {
             listenfd = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            IPAddress ipAdr = IPAddress.Parse("192.168.0.114");
+            IPAddress ipAdr = IPAddress.Parse(GetIp());
             IPEndPoint ipEp = new IPEndPoint(ipAdr, 8888);
             listenfd.Bind(ipEp);
             listenfd.Listen(0);
@@ -58,6 +58,8 @@ namespace ServerProgram
                 }
             }
         }
+
+        public static string GetIp() => Dns.GetHostEntry(Dns.GetHostName()).AddressList.FirstOrDefault(p => p.AddressFamily.ToString() == "InterNetwork")?.ToString();
 
         /// <summary>
         /// 接收客户端的连接请求
@@ -106,15 +108,27 @@ namespace ServerProgram
             }
 
             //广播
-            string recvStr = System.Text.Encoding.Default.GetString(state.readBuffer, 0, count);
-            Console.WriteLine("Receive-->" + recvStr);
-            string[] split = recvStr.Split('|');
-            string msgName = split[0];
-            string msgArgs = split[1];
-            string funName = "Msg" + msgName;
-            MethodInfo mi = typeof(MsgHandler).GetMethod(funName);
-            object[] o = { state, msgArgs };
-            mi.Invoke(null, o);
+            //string recvStr = System.Text.Encoding.Default.GetString(state.readBuffer, 0, count);
+            byte[] msgLengthBytes = new byte[2];
+            Array.Copy(state.readBuffer,0, msgLengthBytes,0,2);
+            int msg_length = BitConverter.ToUInt16(msgLengthBytes);
+
+            byte[] symbolLengthBytes = new byte[2];
+            Array.Copy(state.readBuffer, 2, symbolLengthBytes, 0, 2);
+            int symbol_length = BitConverter.ToUInt16(symbolLengthBytes);
+
+            byte[] jsonBytes = new byte[msg_length - 2];
+            Array.Copy(state.readBuffer, 4, jsonBytes, 0, msg_length - 2);
+            string json = System.Text.Encoding.UTF8.GetString(jsonBytes);
+            Console.WriteLine($"Receive-->[msg_length:{msg_length}]  [symbol_length:{symbol_length}]  {json}");
+
+            //string[] split = recvStr.Split('|');
+            //string msgName = split[0];
+            //string msgArgs = split[1];
+            //string funName = "Msg" + msgName;
+            //MethodInfo mi = typeof(MsgHandler).GetMethod(funName);
+            //object[] o = { state, msgArgs };
+            //mi.Invoke(null, o);
             return true;
         }
 

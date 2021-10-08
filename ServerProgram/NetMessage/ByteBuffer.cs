@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
-namespace Framework.GNetwork
+namespace NetMessage
 {
     /// <summary>
     /// 字节缓冲类
@@ -12,9 +9,18 @@ namespace Framework.GNetwork
     /// </summary>
     public class ByteBuffer
     {
+        /// <summary>
+        /// byte数组，核心缓冲数组
+        /// </summary>
         public byte[] buffer;
-        public int readIdx = 0;                  //写操作索引
-        public int writeIdx = 0;                 //读操作索引
+        /// <summary>
+        /// 写操作索引
+        /// </summary>
+        public int readIdx = 0;
+        /// <summary>
+        /// 读操作索引
+        /// </summary>
+        public int writeIdx = 0;                
 
         private const int DEFAULT_SIZE = 1024;   //缓冲默认容量
         private int capacity = 0;                //当前缓冲容量
@@ -68,7 +74,6 @@ namespace Framework.GNetwork
         {
             if (size <= 0)
             {
-                GDebug.Instance.Warn("初始化的字节缓冲或许不合法");
                 return;
             }
 
@@ -87,13 +92,11 @@ namespace Framework.GNetwork
         {
             if (data == null)
             {
-                GDebug.Instance.Warn("初始化字节缓冲传入的字节数组为空");
                 return;
             }
 
             if (data.Length == 0)
             {
-                GDebug.Instance.Warn("初始化的字节缓冲或许不合法");
                 return;
             }
 
@@ -109,12 +112,12 @@ namespace Framework.GNetwork
         /// 当前缓冲的数据长度是否可以对信息长度进行解析
         /// </summary>
         /// <returns></returns>
-        public bool CanGetMsgLength() => DataLength >= (int)GNetworkManager.LMDT;
+        public bool CanGetMsgLength() => DataLength >= (int)Core.LMDT;
         /// <summary>
         /// 是否可以获得一条完整的数据
         /// </summary>
         /// <returns></returns>
-        public bool CanGetCompleteMsg() => DataLength >= (int)GNetworkManager.LMDT + GetMsgLengthFromBytes();
+        public bool CanGetCompleteMsg() => DataLength >= (int)Core.LMDT + GetMsgLengthFromBytes();
 
         /// <summary>
         /// 从缓冲中读取完整的信息数据
@@ -126,16 +129,16 @@ namespace Framework.GNetwork
         public bool Read(byte[] gets, int offset, out int readCount)
         {
             readCount = 0;
-            if (DataLength < (int)GNetworkManager.LMDT * 2)
+            if (DataLength < (int)Core.LMDT * 2)
                 return false;
 
-            int msg_symbol_length = (int)GNetworkManager.LMDT * 2;     //长度信息字节数
+            int msg_symbol_length = (int)Core.LMDT * 2;     //长度信息字节数
             int msg_length = GetMsgLengthFromBytes();                  //获取此条完整信息的长度
 
             int holeDataLength = Math.Min(msg_length + msg_symbol_length / 2, DataLength);  //完整的数据长度（包含长度标志）
             readCount = holeDataLength - msg_symbol_length;                                 //此次调用读取时能够获取的最大长度
             Array.Copy(buffer, readIdx + msg_symbol_length, gets, offset, readCount);
-            if (msg_length == readCount + (int)GNetworkManager.LMDT)
+            if (msg_length == readCount + (int)Core.LMDT)
             {
                 //此次读取的是完整信息，需要更新缓存中的索引变量
                 readIdx += holeDataLength;
@@ -152,8 +155,7 @@ namespace Framework.GNetwork
         public void Write(byte[] data)
         {
             if (data.Length == 0)
-            {
-                GDebug.Instance.Warn("当前想要写入的字节数组为0！将不写入缓冲中");
+            { 
                 return;
             }
 
@@ -173,10 +175,10 @@ namespace Framework.GNetwork
         /// <returns>若返回0，则意味着数据未完成传输</returns>
         public int GetMsgLengthFromBytes()
         {
-            if (DataLength < (int)GNetworkManager.LMDT)
+            if (DataLength < (int)Core.LMDT)
                 return 0;
 
-            if (GNetworkManager.LMDT == LengthMsgDataType.INT16)
+            if (Core.LMDT == LengthMsgDataType.INT16)
                 return (buffer[1 + readIdx] << 8) | buffer[0 + readIdx];
             else
                 return (buffer[3 + readIdx] << 24) |
@@ -191,10 +193,10 @@ namespace Framework.GNetwork
         /// <returns></returns>
         public int GetMsgSymbolLengthFromeBytes()
         {
-            if (DataLength < (int)GNetworkManager.LMDT * 2)
+            if (DataLength < (int)Core.LMDT * 2)
                 return 0;
 
-            if (GNetworkManager.LMDT == LengthMsgDataType.INT16)
+            if (Core.LMDT == LengthMsgDataType.INT16)
                 return (buffer[3 + readIdx] << 8) | buffer[2 + readIdx];
             else
                 return (buffer[7 + readIdx] << 24) |
@@ -244,7 +246,7 @@ namespace Framework.GNetwork
         /// <summary>
         /// 重新分配缓冲取的数据
         /// </summary>
-        private void RevertBuffer()
+        public void RevertBuffer()
         {
             Array.Copy(buffer, readIdx, buffer, 0, DataLength);
             writeIdx = DataLength;

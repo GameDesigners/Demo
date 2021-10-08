@@ -115,7 +115,7 @@ namespace Framework.GNetwork
         public static void InitClientState()
         {
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            readBuffer = new ByteBuffer();
+            readBuffer = new ByteBuffer(1024);
             sendQueue = new Queue<ByteBuffer>();
             msgList = new List<BaseMsg>();
             
@@ -125,9 +125,10 @@ namespace Framework.GNetwork
             lastRecvHeartBeatPongMsg = Time.time;
             if (!msgEventListeners.ContainsKey(ProtoName.MsgHeartBeatPong.ToString()))
             {
-                AddMsgEventListener(ProtoName.MsgHeartBeatPong, (str) =>
+                AddMsgEventListener(ProtoName.MsgHeartBeatPong, (msg) =>
                 {
                     lastRecvHeartBeatPongMsg = Time.time;
+                    GDebug.Instance.Log($"接收到服务器[{msg.protoName}]");
                 });
             }
 
@@ -180,7 +181,8 @@ namespace Framework.GNetwork
             {
                 Socket socket = ar.AsyncState as Socket;
                 int count = socket.EndReceive(ar);
-                if(count==0)
+                //GDebug.Instance.Log($"receive count:{count}");
+                if (count==0)
                 {
                     Close();
                     return;
@@ -211,13 +213,14 @@ namespace Framework.GNetwork
 
                 int msg_length = readBuffer.GetMsgLengthFromBytes();
                 int msg_symbol_length = readBuffer.GetMsgSymbolLengthFromeBytes();
-                byte[] data = new byte[msg_length];
+                byte[] data = new byte[msg_length-(int)LMDT];
                 int readCount;
                 if (readBuffer.Read(data, 0, out readCount))
                 {
                     string typeName;
                     //读取了完整的数据
                     BaseMsg msg = BaseMsg.ParseBytesPage(data, msg_symbol_length,out typeName);
+                    //GDebug.Instance.Log(msg.protoName);
                     lock(msgList)
                     {
                         msgList.Add(msg);
@@ -240,6 +243,7 @@ namespace Framework.GNetwork
                 return;
 
             ByteBuffer package = BaseMsg.GetBytesPackage(msg.protoName,msg);
+            //GDebug.Instance.Log($"将要发送长度为：{package.DataLength}byte的数据.");
             int count = 0;
             lock(sendQueue)
             {
@@ -274,12 +278,13 @@ namespace Framework.GNetwork
                     lock(sendQueue)
                     {
                         sendQueue.Dequeue();
-                        byteBuffer = sendQueue.First();
+                        if (sendQueue.Count > 0)
+                            byteBuffer = sendQueue.First();
                     }
                 }
 
                 //若队列中仍存在信息需要发送
-                if (byteBuffer != null)
+                if (byteBuffer != null && byteBuffer.DataLength != 0)
                     socket.BeginSend(byteBuffer.buffer, byteBuffer.readIdx, byteBuffer.DataLength, 0, SendCallback, socket);
                 else if (clientState == ClientConnectState.Closing)
                     socket.Close();

@@ -1,37 +1,23 @@
 ﻿using System;
 using System.Linq;
-using Framework.DataManager;
+using System.Reflection;
+using System.Text.Json;
 
-namespace Framework.GNetwork
+namespace NetMessage
 {
-    /// <summary>
-    /// 客户连接状态
-    /// </summary>
-    public enum ClientConnectState
-    {
-        Disconnect,
-        Connecting,
-        Closing,
-        Connected,
-    }
-
-    /// <summary>
-    /// 网络事件类型
-    /// </summary>
-    public enum NetEvent
-    {
-        ConnectSucc,
-        ConnectFail,
-        Close
-    }
-
     /// <summary>
     /// 信息事件
     /// </summary>
     public enum ProtoName
     {
-        MsgHeartBeatPing,      //客户端发往服务端的心跳信号
-        MsgHeartBeatPong,      //服务端法网客户端的心跳信号
+        /// <summary>
+        /// 客户端发往服务端的心跳信号
+        /// </summary>
+        MsgHeartBeatPing,
+        /// <summary>
+        /// 服务端法网客户端的心跳信号
+        /// </summary>
+        MsgHeartBeatPong,      
     }
 
     /// <summary>
@@ -39,7 +25,13 @@ namespace Framework.GNetwork
     /// </summary>
     public enum LengthMsgDataType : int
     {
+        /// <summary>
+        /// short类型
+        /// </summary>
         INT16 = 2,
+        /// <summary>
+        /// int类型
+        /// </summary>
         INT32 = 4
     }
 
@@ -49,37 +41,55 @@ namespace Framework.GNetwork
     [Serializable]
     public class BaseMsg
     {
-        public string protoName = ""; 
+        /// <summary>
+        /// 信息类名称
+        /// </summary>
+        public string protoName { get; set; }
 
+        /// <summary>
+        /// 对可序列化的实例进行json序列化
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="msg"></param>
+        /// <returns></returns>
         public static byte[] Encode<T>(T msg) where T : class
         {
-            string json = JsonUtil.Serialize(msg);
+            string json = JsonSerializer.Serialize(msg);
             return System.Text.Encoding.UTF8.GetBytes(json);
         }
 
-        public static BaseMsg Decode<T>(byte[] bytes,int offset,int count) where T : class
+        /// <summary>
+        /// 对完整的json语句进行解码（要求要符合json格式的byte数组）
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="bytes"></param>
+        /// <param name="offset"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public static BaseMsg Decode<T>(byte[] bytes, int offset, int count) where T : class
         {
             string json = System.Text.Encoding.UTF8.GetString(bytes, offset, count);
-            BaseMsg msg = JsonUtil.DeserializeFromString<T>(json) as BaseMsg;
+            BaseMsg msg = JsonSerializer.Deserialize<T>(json) as BaseMsg;
             return msg;
         }
 
         /// <summary>
         /// 根据实例获取发送信息的字节包
         /// </summary>
-        /// <typeparam name="T">实例类型</typeparam>
-        /// <param name="msg">信息实例</param>
-        /// <returns>打包字节</returns>
-        public static ByteBuffer GetBytesPackage<T>(string protoName,T msg) where T : BaseMsg
+        /// <typeparam name="T">打包的实例类型</typeparam>
+        /// <param name="protoName">实例类名称</param>
+        /// <param name="msg">实例</param>
+        /// <returns>字节缓冲</returns>
+        public static ByteBuffer GetBytesPackage<T>(string protoName, T msg) where T : BaseMsg
         {
             byte[] data = Encode(msg);
 
             byte[] len_msg;
-            if (GNetworkManager.LMDT == LengthMsgDataType.INT16)
+            if (Core.LMDT == LengthMsgDataType.INT16)
             {
-                
+
                 short type_str_length = (short)protoName.Length;
-                short msg_length = (short)(2 + type_str_length+ data.Length);
+                short msg_length = (short)(2 + type_str_length + data.Length);
                 len_msg = BitConverter.GetBytes(msg_length);
                 len_msg = len_msg.Concat(BitConverter.GetBytes(type_str_length)).ToArray();
             }
@@ -104,14 +114,15 @@ namespace Framework.GNetwork
         public static BaseMsg ParseBytesPage(byte[] data, int msgSymbolLength, out string typeName)
         {
             typeName = "";
-            if (data.Length < (int)GNetworkManager.LMDT * 2)
+            if (data.Length < (int)Core.LMDT * 2)
             {
                 return default;
             }
             byte[] typeBytes = new byte[msgSymbolLength];
             Array.Copy(data, 0, typeBytes, 0, msgSymbolLength);
             typeName = System.Text.Encoding.UTF8.GetString(typeBytes);
-            Type type = Type.GetType($"Framework.GNetwork.{typeName}");
+            Assembly assembly = Assembly.LoadFrom("NetMessage.dll");
+            Type type = assembly.GetType($"NetMessage.{typeName}");
             if (type != null)
             {
                 byte[] jsonBytes = new byte[data.Length - msgSymbolLength];
@@ -120,7 +131,7 @@ namespace Framework.GNetwork
                 //Console.WriteLine($"json:{json}");
                 try
                 {
-                    return JsonUtil.DeserializeFromString(json, type) as BaseMsg;
+                    return JsonSerializer.Deserialize(json, type) as BaseMsg;
                 }
                 catch(Exception ex)
                 {
@@ -136,23 +147,33 @@ namespace Framework.GNetwork
     }
 
 
+    /// <summary>
+    /// 心跳机制的Ping
+    /// </summary>
     [Serializable]
     public class MsgHeartBeatPing : BaseMsg
     {
+        /// <summary>
+        /// 初始化protoName的构造函数
+        /// </summary>
         public MsgHeartBeatPing()
         {
             base.protoName = "MsgHeartBeatPing";
         }
     }
 
+    /// <summary>
+    /// 心跳机制的Pong
+    /// </summary>
     [Serializable]
     public class MsgHeartBeatPong : BaseMsg
     {
+        /// <summary>
+        /// 初始化protoName的构造函数
+        /// </summary>
         public MsgHeartBeatPong()
         {
             base.protoName = "MsgHeartBeatPong";
         }
     }
-
-    
 }
